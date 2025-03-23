@@ -1,0 +1,317 @@
+{
+    "colorful_pitch_deck": {
+        "location": "/home/adavid/Documents/GitHub/sliderblend/sliderblend/templates/colorful_pitch_deck.pptx",
+        "layouts": [
+            {
+                "index": 0,
+                "name": "Title Only",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    }
+                ]
+            },
+            {
+                "index": 1,
+                "name": "Content 3",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 14,
+                        "name": "Content Placeholder 2"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    }
+                ]
+            },
+            {
+                "index": 2,
+                "name": "Title + Picture",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 13,
+                        "name": "Picture Placeholder 62"
+                    }
+                ]
+            },
+            {
+                "index": 3,
+                "name": "Title + Subtitle + Picture ",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 1,
+                        "name": "Subtitle 2"
+                    },
+                    {
+                        "idx": 13,
+                        "name": "Picture Placeholder 62"
+                    }
+                ]
+            },
+            {
+                "index": 4,
+                "name": "Content 1",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    },
+                    {
+                        "idx": 14,
+                        "name": "Content Placeholder 2"
+                    }
+                ]
+            },
+            {
+                "index": 5,
+                "name": "Title + Subtitle",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 1,
+                        "name": "Subtitle 2"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    }
+                ]
+            },
+            {
+                "index": 6,
+                "name": "Two Content 1",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    },
+                    {
+                        "idx": 14,
+                        "name": "Content Placeholder 2"
+                    },
+                    {
+                        "idx": 15,
+                        "name": "Content Placeholder 2"
+                    }
+                ]
+            },
+            {
+                "index": 7,
+                "name": "Two Content 2",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 14,
+                        "name": "Content Placeholder 2"
+                    },
+                    {
+                        "idx": 1,
+                        "name": "Content Placeholder 2"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    }
+                ]
+            },
+            {
+                "index": 8,
+                "name": "Content + Picture",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 15,
+                        "name": "Picture Placeholder 26"
+                    },
+                    {
+                        "idx": 16,
+                        "name": "Content Placeholder 2"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    }
+                ]
+            },
+            {
+                "index": 9,
+                "name": "Content + Table",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 13,
+                        "name": "Text Placeholder 4"
+                    },
+                    {
+                        "idx": 14,
+                        "name": "Table Placeholder 7"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    }
+                ]
+            },
+            {
+                "index": 10,
+                "name": "Two Content 3",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 15,
+                        "name": "Content Placeholder 2"
+                    },
+                    {
+                        "idx": 14,
+                        "name": "Text Placeholder 12"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    }
+                ]
+            },
+            {
+                "index": 11,
+                "name": "Table",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 13,
+                        "name": "Table Placeholder 4"
+                    },
+                    {
+                        "idx": 10,
+                        "name": "Date Placeholder 3"
+                    },
+                    {
+                        "idx": 11,
+                        "name": "Footer Placeholder 4"
+                    },
+                    {
+                        "idx": 12,
+                        "name": "Slide Number Placeholder 5"
+                    }
+                ]
+            },
+            {
+                "index": 12,
+                "name": "Content 2",
+                "placeholders": [
+                    {
+                        "idx": 0,
+                        "name": "Title 1"
+                    },
+                    {
+                        "idx": 1,
+                        "name": "Subtitle 2"
+                    }
+                ]
+            }
+        ]
+    }
+}
