@@ -83,7 +83,7 @@ class Documents(BaseModel, table=True):
 
 
 class DocumentEmbeddings(BaseModel, table=True):
-    __tablename_ = "users"
+    __tablename_ = "document_embeddings"
     text: str
     embedding: Any = Field(sa_type=Vector(1024))
     page_number: int = Field(nullable=False)
