@@ -83,8 +83,8 @@ class Documents(BaseModel, table=True):
 
 
 class DocumentEmbeddings(BaseModel, table=True):
-    __tablename_ = "document_embeddings"
-    text: str
+    __tablename__ = "document_embeddings"
+    text: str = Field(nullable=False)
     embedding: Any = Field(sa_type=Vector(1024))
     page_number: int = Field(nullable=False)
     document: "Documents" = Relationship(back_populates="embedding")
