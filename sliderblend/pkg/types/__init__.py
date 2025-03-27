@@ -1,1 +1,1 @@
-from sliderblend.types.agent_types import EmbeddingModel
+from sliderblend.pkg.types.agent_types import EmbeddingModel
