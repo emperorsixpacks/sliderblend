@@ -1,1 +1,1 @@
-from sliderblend.utils.utils import return_base_dir, exists
+from sliderblend.pgk.utils.app_utils import return_base_dir, exists
