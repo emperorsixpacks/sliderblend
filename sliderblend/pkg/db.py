@@ -1,7 +1,6 @@
 from sqlmodel import Session, create_engine
 
-from sliderblend.settings import DatabaseSettings
-
+from sliderblend import DatabaseSettings 
 database = DatabaseSettings()
 engine = create_engine(
     database.return_connction_string(), echo=True

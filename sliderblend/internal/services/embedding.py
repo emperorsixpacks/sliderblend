@@ -4,10 +4,10 @@ import cohere
 import fitz
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from sliderblend import logger, settings, types, utils
+from sliderblend import get_logger, CohereSettings, utils, types
 
-cohere_settings = settings.CohereSettings()
-LOGGER = logger.get_logger()
+cohere_settings = CohereSettings()
+logger = get_logger()
 
 RECURSIVESPLITTER = RecursiveCharacterTextSplitter(
     ["\n\n", "\n", "."], chunk_size=1500, chunk_overlap=500
@@ -24,7 +24,7 @@ class LoadPDF:
     def read(self):
         contents: str = ""
         if not utils.exists(self.file):
-            LOGGER.error("could not open file %s", self.file)
+            logger.error("could not open file %s", self.file)
             raise FileNotFoundError(f"Prompt {self.file} does not exist")
         with fitz.open(self.file) as document:
             for page in document:
@@ -45,7 +45,7 @@ async def embed_document(
     ]
     logger.info("Starting embedding")
     for batch in batches:
-        LOGGER.info("Starting embedding on batch")
+        logger.info("Starting embedding on batch")
         embeddings = await embedding_model.embed(
             model="embed-english-v3.0",
             input_type="search_document",
