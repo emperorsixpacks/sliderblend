@@ -4,7 +4,9 @@ import cohere
 import fitz
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-from sliderblend import get_logger, CohereSettings, utils, types
+from sliderblend.pgk import get_logger, CohereSettings 
+from sliderblend.pkg.types import EmbeddingModel
+from sliderblend.pkg.utils import exists
 
 cohere_settings = CohereSettings()
 logger = get_logger()
@@ -23,7 +25,7 @@ class LoadPDF:
 
     def read(self):
         contents: str = ""
-        if not utils.exists(self.file):
+        if not exists(self.file):
             logger.error("could not open file %s", self.file)
             raise FileNotFoundError(f"Prompt {self.file} does not exist")
         with fitz.open(self.file) as document:
@@ -35,7 +37,7 @@ class LoadPDF:
 # This function exclusively uses Cohere's embedding model to embed documents.
 # It processes the input document in batches and returns float embeddings.
 async def embed_document(
-    embedding_model: types.EmbeddingModel, *, document: List[str], batch_size: int
+    embedding_model: EmbeddingModel, *, document: List[str], batch_size: int
 ):
     all_embeddings = []
 

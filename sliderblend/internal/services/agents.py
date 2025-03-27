@@ -1,7 +1,7 @@
 from pydantic_ai import Agent
 from pydantic_ai.models.openai import OpenAIModel
 
-from sliderblend import LLMSettings 
+from sliderblend.pkg import LLMSettings 
 llm_settings = LLMSettings()
 
 model = OpenAIModel(

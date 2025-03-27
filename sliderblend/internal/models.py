@@ -6,7 +6,8 @@ from uuid import UUID, uuid4
 from pgvector.sqlalchemy import Vector
 from pydantic import ConfigDict, EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-from sliderblend import constants
+
+from sliderblend.pkg.constants import KB, MB 
 
 class FileSize(Enum):
     KiloBytes = 0
@@ -21,7 +22,7 @@ class BaseModel(SQLModel):
     created_date: datetime = Field(default_factory=datetime.now)
 
 
-class User(BaseModel, table=True):
+class UserModel(BaseModel, table=True):
     __tablename__ = "users"
 
     telegram_username: Optional[str] = Field(nullable=True)
@@ -42,34 +43,34 @@ class User(BaseModel, table=True):
 
     command_count: int = Field(default=0)
     is_blocked: bool = Field(default=False)
-    documents: List["Documents"] = Relationship(back_populates="user")
+    documents: List["DocumentsModel"] = Relationship(back_populates="user")
 
     def update_last_interaction(self):
         self.last_interaction = datetime.now()
 
 
-class Documents(BaseModel, table=True):
+class DocumentsModel(BaseModel, table=True):
     __tablename__ = "documents"
     number_of_pages: int = Field(nullable=False)
     size: int = Field(nullable=False)
     unit: FileSize = Field(nullable=False)
     is_embedded: bool = Field(default=False, nullable=False)
-    user: "User" = Relationship(back_populates="documents")
-    embedding: Optional["DocumentEmbeddings"] = Relationship(
+    user: "UserModel" = Relationship(back_populates="documents")
+    embedding: Optional["DocumentEmbeddingsModel"] = Relationship(
         back_populates="document",
         sa_relationship_kwargs={"uselist": False},  # Ensures one-to-one
     )
 
     def get_size_in_unit(self) -> str:
         if self.unit == FileSize.KiloBytes:
-            return f"{self.size * constants.KB)kb"
+            return f"{self.size * KB}kb"
         if self.unit == FileSize.MegaBytes:
-            return f"{self.size * constants.MB}mb"
+            return f"{self.size * MB}mb"
 
 
-class DocumentEmbeddings(BaseModel, table=True):
+class DocumentEmbeddingsModel(BaseModel, table=True):
     __tablename__ = "document_embeddings"
     text: str = Field(nullable=False)
     embedding: Any = Field(sa_type=Vector(1024))
     page_number: int = Field(nullable=False)
-    document: "Documents" = Relationship(back_populates="embedding")
+    document: "DocumentsModel" = Relationship(back_populates="embedding")
