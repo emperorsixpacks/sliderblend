@@ -21,15 +21,10 @@ logger = get_logger()
 system_prompt = Prompt(BASE_PROMPT, number_of_slides=NUMBER_OF_SLIDES, tone="cheerful")
 engine = create_engine(DATABASE_URL, echo=True)  # echo=True logs SQL statements
 # Create the tables (if they don’t exist)
-model = OpenAIModel(
-    os.getenv("OPENROUTER_MODEL"),
-    base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_MODEL"),
-)
+
 
 # agent = Agent(model, system_prompt=system_prompt.read())
 # agent.run_sync("Generate presentations")
 
 
-embedding_model = cohere.AsyncClient(os.getenv("COHERE_API_KEY"))
 

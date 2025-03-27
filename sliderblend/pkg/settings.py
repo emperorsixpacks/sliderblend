@@ -27,3 +27,6 @@ class DatabaseSettings(BaseAppSettings):
 class LLMSettings(BaseAppSettings):
     llm_name: str
     llm_api_key: Optional[str] = None
+
+class CohereSettings(BaseAppSettings):
+    cohere_api_key: Optional[str] = None

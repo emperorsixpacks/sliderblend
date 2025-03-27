@@ -6,9 +6,7 @@ from uuid import UUID, uuid4
 from pgvector.sqlalchemy import Vector
 from pydantic import ConfigDict, EmailStr
 from sqlmodel import Field, Relationship, SQLModel
-
-from sliderblend.utils import KB, MB
-
+from sliderblend import constants
 
 class FileSize(Enum):
     KiloBytes = 0
@@ -64,9 +62,9 @@ class Documents(BaseModel, table=True):
 
     def get_size_in_unit(self) -> str:
         if self.unit == FileSize.KiloBytes:
-            return f"{self.size * KB}kb"
+            return f"{self.size * constants.KB)kb"
         if self.unit == FileSize.MegaBytes:
-            return f"{self.size * MB}mb"
+            return f"{self.size * constants.MB}mb"
 
 
 class DocumentEmbeddings(BaseModel, table=True):
