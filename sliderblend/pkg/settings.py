@@ -4,9 +4,9 @@ from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from sliderblend import utils
+from sliderblend.pkg.utils import return_base_dir
 
-env_dir = os.path.join(utils.return_base_dir(), ".env")
+env_dir = os.path.join(return_base_dir(), ".env")
 
 
 class BaseAppSettings(BaseSettings):
@@ -17,7 +17,7 @@ class BaseAppSettings(BaseSettings):
 
 class WebAppSettings(BaseAppSettings):
     PROJECT_NAME: str = "Slide Generator API"
-    BASE_DIR: Path = utils.return_base_dir()
+    BASE_DIR: Path = return_base_dir()
     TEMPLATES_DIR: Path = os.path.join(BASE_DIR, "templates")
     STATIC_DIR: Path = os.path.join(BASE_DIR, "static")
 
