@@ -20,43 +20,30 @@ class BaseModel(SQLModel):
         use_enum_values=True, validate_assignment=True, populate_by_name=True
     )
     id: UUID = Field(default_factory=lambda x: str(uuid4()), primary_key=True)
-    created_date: datetime = Field(default_factory=datetime.now())
+    created_date: datetime = Field(default_factory=datetime.now)
 
 
 class User(BaseModel, table=True):
     __tablename__ = "users"
 
-    telegram_username: Optional[str] = Field(
-        nullable=True, comment="Telegram username (if set)"
-    )
-    first_name: str = Field(nullable=False, comment="User's first name from Telegram")
-    last_name: Optional[str] = Field(
-        nullable=True, comment="user's last name from Telegram"
-    )
-    language_code: Optional[str] = Field(
-        nullable=True, comment="User's language code (e.g., 'en')"
-    )
+    telegram_username: Optional[str] = Field(nullable=True)
+    first_name: str = Field(nullable=False)
+    last_name: Optional[str] = Field(nullable=True)
+    language_code: Optional[str] = Field(nullable=True)
 
-    is_active: bool = Field(
-        default=True, comment="Whether the user is currently active"
-    )
+    is_active: bool = Field(default=True)
 
-    last_interaction: Optional[datetime] = Field(
-        nullable=True, comment="Last time user interacted with bot"
-    )
-    chat_id: int = Field(nullable=False, comment="Telegram chat ID for messaging")
+    last_interaction: Optional[datetime] = Field(nullable=True)
+    chat_id: int = Field(nullable=False)
 
-    email: Optional[EmailStr] = Field(nullable=True, comment="User's email address")
-    phone_number: Optional[str] = Field(nullable=True, comment="User's phone number")
+    email: Optional[EmailStr] = Field(nullable=True)
+    phone_number: Optional[str] = Field(nullable=True)
     timezone: Optional[str] = Field(
         nullable=True,
-        comment="User's timezone (e.g., 'UTC', 'America/New_York')",
     )
 
-    command_count: int = Field(default=0, comment="Number of commands executed by user")
-    is_blocked: bool = Field(
-        default=False, comment="Whether the user is blocked from using the bot"
-    )
+    command_count: int = Field(default=0)
+    is_blocked: bool = Field(default=False)
     documents: List["Documents"] = Relationship(back_populates="user")
 
     def update_last_interaction(self):
