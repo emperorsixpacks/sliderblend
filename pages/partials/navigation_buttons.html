@@ -1,0 +1,24 @@
+<!-- Buttons -->
+{% if show_navigation %}
+<div class="flex justify-between pt-4">
+  <button type="button" class="px-4 py-2 border border-gray-300 rounded flex items-center" hx-get="{{previous_step}}"
+    hx-target="#main-content" hx-swap="innerHTML">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd"
+        d="M9.707 14.707a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 1.414L7.414 9H15a1 1 0 110 2H7.414l2.293 2.293a1 1 0 010 1.414z"
+        clip-rule="evenodd" />
+    </svg>
+    Back
+  </button>
+  <button type="submit" class="px-4 py-2 bg-gray-500 text-white rounded flex items-center" hx-get="{{next_step}}"
+    hx-target="#main-content" hx-swap="innerHTML">
+    Next
+
+    <svg xmlns=" http://www.w3.org/2000/svg" class="h-4 w-4 ml-2" viewBox="0 0 20 20" fill="currentColor">
+      <path fill-rule="evenodd"
+        d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z"
+        clip-rule="evenodd" />
+    </svg>
+  </button>
+</div>
+{% endif %}

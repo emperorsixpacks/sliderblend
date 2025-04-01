@@ -1,0 +1,177 @@
+{% extends "steps/base_step.html" %}
+{% block content %}
+
+<div class="bg-white rounded-lg p-6 shadow mb-4">
+  <h2 class="text-xl font-bold text-center mb-1">Upload Your Document</h2>
+  <p class="text-gray-600 text-center text-sm mb-6">Upload a PDF or document to generate your presentation</p>
+
+  <form id="upload-form" method="POST" enctype="multipart/form-data">
+    <!-- File Upload Area -->
+    <div class="border-2 border-dashed rounded-lg p-8 mb-4 text-center cursor-pointer" id="drop-area"
+      onclick="document.getElementById('file-input').click()">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-gray-400 mb-2" fill="none"
+        viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z" />
+      </svg>
+      <p>Drag & drop or click to upload</p>
+      <p class="text-xs text-gray-500 mt-1">Supports PDF, DOC, DOCX</p>
+      <input type="file" id="file-input" name="document" class="hidden" accept=".pdf,.doc,.docx"
+        onchange="handleFileSelected(this)">
+    </div>
+
+    <!-- Selected File Display -->
+    <div id="file-info" class="mb-4 hidden">
+      <div class="flex items-center bg-gray-100 p-2 rounded">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2 text-gray-600" fill="none" viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2z" />
+        </svg>
+        <span id="file-name" class="text-sm truncate flex-1"></span>
+        <button type="button" onclick="removeFile()" class="ml-2 text-gray-600">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      <div id="file-size-error" class="text-red-500 text-sm mt-1 hidden">
+        File too large. Maximum size is 15MB.
+      </div>
+      <div id="file-type-error" class="text-red-500 text-sm mt-1 hidden">
+        Invalid file type. Please upload a PDF, DOC, or DOCX file.
+      </div>
+    </div>
+
+    <!-- Process Button -->
+    <button type="button" id="process-btn" class="w-full bg-black text-white py-3 rounded-lg font-medium hidden"
+      onclick="processDocument()">
+      Process Document
+    </button>
+  </form>
+
+  <!-- Progress Bar (Initially Hidden) -->
+  <div id="progress-container" class="hidden">
+    <p class="text-sm mb-1">Processing document...</p>
+    <div class="progress-bar mb-1">
+      <div id="progress-bar-inner" class="progress-bar-inner" style="width: 0%"></div>
+    </div>
+    <div class="flex justify-end">
+      <span id="progress-percentage" class="text-sm">0%</span>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  // Set up drag and drop handlers
+  const dropArea = document.getElementById('drop-area');
+
+  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, preventDefaults, false);
+  });
+
+  function preventDefaults(e) {
+    e.preventDefault();
+    e.stopPropagation();
+  }
+
+  ['dragenter', 'dragover'].forEach(eventName => {
+    dropArea.addEventListener(eventName, highlight, false);
+  });
+
+  ['dragleave', 'drop'].forEach(eventName => {
+    dropArea.addEventListener(eventName, unhighlight, false);
+  });
+
+  function highlight() {
+    dropArea.classList.add('border-gray-500', 'bg-gray-50');
+  }
+
+  function unhighlight() {
+    dropArea.classList.remove('border-gray-500', 'bg-gray-50');
+  }
+
+  dropArea.addEventListener('drop', handleDrop, false);
+
+  function handleDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files.length) {
+      const fileInput = document.getElementById('file-input');
+      fileInput.files = files;
+      handleFileSelected(fileInput);
+    }
+  }
+
+  // Handle file selection
+  function handleFileSelected(fileInput) {
+    const fileInfo = document.getElementById('file-info');
+    const fileName = document.getElementById('file-name');
+    const fileSizeError = document.getElementById('file-size-error');
+    const fileTypeError = document.getElementById('file-type-error');
+    const processBtn = document.getElementById('process-btn');
+
+    if (fileInput.files.length > 0) {
+      const file = fileInput.files[0];
+
+      // Display file name
+      fileName.textContent = file.name;
+      fileInfo.classList.remove('hidden');
+
+      // Check file size (15MB limit)
+      const isSizeValid = file.size <= 15 * 1024 * 1024;
+      fileSizeError.classList.toggle('hidden', isSizeValid);
+
+      // Check file type
+      const validTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+      const isTypeValid = validTypes.includes(file.type);
+      fileTypeError.classList.toggle('hidden', isTypeValid);
+
+      // Show process button if valid
+      processBtn.classList.toggle('hidden', !(isSizeValid && isTypeValid));
+    } else {
+      fileInfo.classList.add('hidden');
+      processBtn.classList.add('hidden');
+    }
+  }
+
+  // Remove file
+  function removeFile() {
+    const fileInput = document.getElementById('file-input');
+    fileInput.value = '';
+
+    document.getElementById('file-info').classList.add('hidden');
+    document.getElementById('process-btn').classList.add('hidden');
+  }
+
+  // Process document with progress simulation
+  function processDocument() {
+    document.getElementById('file-info').classList.add('hidden');
+    document.getElementById('process-btn').classList.add('hidden');
+
+    const progressContainer = document.getElementById('progress-container');
+    const progressBarInner = document.getElementById('progress-bar-inner');
+    const progressPercentage = document.getElementById('progress-percentage');
+
+    progressContainer.classList.remove('hidden');
+
+    let progress = 0;
+    const interval = setInterval(() => {
+      progress += 5;
+      progressBarInner.style.width = progress + '%';
+      progressPercentage.textContent = progress + '%';
+
+      if (progress >= 100) {
+        clearInterval(interval);
+        setTimeout(() => {
+          htmx.ajax('GET', '{{ url_for("config_presentation") }}', {
+            target: '#main-content',
+            swap: 'innerHTML'
+          });
+        }, 500);
+      }
+    }, 200);
+  }
+</script>
+{% endblock %}

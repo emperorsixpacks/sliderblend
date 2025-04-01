@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="flex justify-center items-center flex-col gap-4">
+  <h2>Click next to continue</h2>
+  <div class="button-wrapper">
+    <button type="submit" class="neon-button" hx-get="{{next_step}}"
+      hx-target="#main-content" hx-swap="innerHTML">
+      Next
+    </button>
+  </div>
+</div>
+
+<style>
+  .button-wrapper {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .neon-button {
+    position: relative;
+    padding: 10px 24px;
+    background-color: #000000;
+    color: white;
+    font-weight: bold;
+    border-radius: 30px;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    z-index: 1;
+    transition: transform 0.3s ease;
+  }
+  
+  .neon-button:hover {
+    transform: translateY(-3px);
+  }
+  
+  .button-wrapper::before,
+  .button-wrapper::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: 30px;
+    background: linear-gradient(90deg, #ff00ff, #00ffff, #0000ff, #ff00ff);
+    background-size: 400% 400%;
+    z-index: 0;
+    animation: gradient-animation 4s linear infinite;
+  }
+  
+  .button-wrapper::after {
+    filter: blur(8px);
+    opacity: 0.7;
+    z-index: -1;
+  }
+  
+  .neon-button:hover ~ .button-wrapper::before,
+  .neon-button:hover ~ .button-wrapper::after,
+  .button-wrapper:hover::before,
+  .button-wrapper:hover::after {
+    animation-play-state: paused;
+  }
+  
+  @keyframes gradient-animation {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const wrappers = document.querySelectorAll('.button-wrapper');
+    
+    wrappers.forEach(wrapper => {
+      // Fix the structure to ensure proper layering
+      const button = wrapper.querySelector('.neon-button');
+      const parentDiv = wrapper.parentNode;
+      
+      // Create a new wrapper with the correct order
+      const newWrapper = document.createElement('div');
+      newWrapper.className = 'button-wrapper';
+      
+      // Remove button from old wrapper and add to new wrapper
+      wrapper.removeChild(button);
+      newWrapper.appendChild(button);
+      
+      // Replace old wrapper with new one
+      parentDiv.replaceChild(newWrapper, wrapper);
+      
+      // Add hover event to tilt the button
+      button.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-3px)';
+      });
+      
+      button.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+      });
+    });
+  });
+</script>
+{% endblock %}

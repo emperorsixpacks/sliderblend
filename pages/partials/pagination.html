@@ -1,0 +1,13 @@
+<div class="flex justify-center gap-4 mb-6">
+  {% for page in range(1, total_pages + 1) %}
+  <div class="w-8 h-8 rounded-full flex items-center justify-center 
+                {% if page == active_page %}
+                  bg-black text-white
+                {% else %}
+                  bg-gray-300
+                {% endif %}">
+    {{page}}
+
+  </div>
+  {% endfor %}
+</div>

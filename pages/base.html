@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" x-data="{
+      darkMode: localStorage.getItem('darkMode')
+      || localStorage.setItem('darkMode', 'system')}"
+  x-init="$watch('darkMode', val => localStorage.setItem('darkMode', val))"
+  x-bind:class="{'dark': darkMode === 'dark' || (darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)}">
+
+<head>
+  {% include 'components/head.html' %}
+</head>
+
+<body class="min-h-screen">
+  {% include 'components/header.html' %}
+  <section class="pt-16 pb-4 max-w-md mx-auto p-4">
+    <div class="card rounded-lg shadow-sm border p-6 space-y-4">
+      <div id="main-content">
+        {% block content %}
+        {% endblock %}
+      </div>
+    </div>
+  </section>
+</body>
+
+</html>

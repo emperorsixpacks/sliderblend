@@ -1,0 +1,55 @@
+{% extends "steps/base_step.html" %}
+{% block content %}
+
+<!-- Configure Presentation Card -->
+<div class="bg-white rounded-lg shadow-sm p-6" x-data="{ slideCount: 5, generateTitles: true }">
+  <h1 class="text-2xl font-bold text-center mb-1">Configure Presentation</h1>
+  <p class="text-gray-500 text-center text-sm mb-6">Set up your presentation parameters</p>
+
+  <form hx-post="/generate-outline" hx-target="#main-content" hx-swap="outerHTML" class="space-y-6">
+    <!-- Presentation Title -->
+    <div>
+      <label for="presentation-title" class="block font-medium mb-2">
+        Presentation Title
+      </label>
+      <input type="text" id="presentation-title" name="presentation-title"
+        class="w-full p-2 border border-gray-300 rounded" placeholder="e.g., Introduction to AI" />
+    </div>
+
+    <!-- Number of Slides -->
+    <div>
+      <label class="block font-medium mb-2">
+        Number of Slides
+      </label>
+      <div class="flex items-center">
+        <span class="mr-4">3</span>
+        <input type="range" name="slide-count" min="3" max="15" x-model="slideCount" class="flex-1" />
+        <span class="ml-4" x-text="slideCount">5</span>
+      </div>
+    </div>
+
+    <!-- AI Generate Titles -->
+    <div>
+      <div class="flex items-center">
+        <input type="checkbox" id="generate-titles" name="generate-titles" x-model="generateTitles"
+          class="w-4 h-4 text-black" />
+        <label for="generate-titles" class="ml-2 font-medium">
+          Let AI generate slide titles
+        </label>
+      </div>
+      <p class="text-gray-500 text-sm ml-6">
+        Uncheck to manually set titles in the outline
+      </p>
+    </div>
+
+    <!-- Additional Information -->
+    <div>
+      <label for="additional-info" class="block font-medium mb-2">
+        Additional Information
+      </label>
+      <textarea id="additional-info" name="additional-info" rows="4" class="w-full p-2 border border-gray-300 rounded"
+        placeholder="Any specific points you want to include..."></textarea>
+    </div>
+  </form>
+</div>
+{% endblock %}
