@@ -1,7 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
-from typing import TypeAlias, Union
 from uuid import UUID, uuid4
 
 
@@ -35,5 +34,5 @@ class RedisJob:
         self.is_complete = True
 
 
-ProcessError: TypeAlias = Union[dict, None]
-JobProcess: TypeAlias = Union[RedisJob, None]
+type ProcessError = dict | None
+type JobProcess = RedisJob | None
