@@ -11,6 +11,7 @@ from urllib.parse import parse_qs
 from fastapi.templating import Jinja2Templates
 
 from sliderblend.pkg.constants import TG_INITDATA_LIFESPAN
+from sliderblend.pkg.types import error, Error
 
 if TYPE_CHECKING:
     from starlette.datastructures import URL
@@ -39,7 +40,9 @@ class PageContext:
         return self.__dict__
 
 
-def verify_tg_init_data(init_data: TelegramInitData, bot_token: str) -> dict:
+def verify_tg_init_data(
+    init_data: TelegramInitData, bot_token: str
+) -> TelegramInitData | error:
     """
     Verify Telegram initData and return user data if valid.
 
@@ -56,7 +59,7 @@ def verify_tg_init_data(init_data: TelegramInitData, bot_token: str) -> dict:
     )
 
     if exp_date < datetime.now():
-        return None
+        return None, Error(message="Data expired")
 
     # Generate secret key from bot token
     secret_key = hmac.new("WebAppData".encode(), bot_token.encode(), hashlib.sha256)
@@ -66,9 +69,10 @@ def verify_tg_init_data(init_data: TelegramInitData, bot_token: str) -> dict:
     # Verify the hash
     if hmac.compare_digest(computed_hash.hexdigest(), init_data.res_hash):
         # Extract and parse user data
-        return init_data.user
+        return init_data
 
-    return None
+    return None, Error(message="Invalid data")
+
 
 
 # TODO write tests
