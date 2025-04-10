@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import hashlib
 import hmac
-from datetime import datetime
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+import time
 from typing import TYPE_CHECKING, Any
 from urllib.parse import parse_qs
 
 from fastapi.templating import Jinja2Templates
+
+from sliderblend.pkg.constants import TG_INITDATA_LIFESPAN
 
 if TYPE_CHECKING:
     from starlette.datastructures import URL
@@ -47,6 +50,14 @@ def verify_tg_init_data(init_data: TelegramInitData, bot_token: str) -> dict:
     Returns:
         dict: User data if verified, or raises ValueError if invalid
     """
+
+    exp_date = datetime.fromtimestamp(init_data.auth_date) + timedelta(
+        seconds=TG_INITDATA_LIFESPAN
+    )
+
+    if exp_date < datetime.now():
+        return None
+
     # Generate secret key from bot token
     secret_key = hmac.new("WebAppData".encode(), bot_token.encode(), hashlib.sha256)
     computed_hash = hmac.new(
@@ -58,3 +69,6 @@ def verify_tg_init_data(init_data: TelegramInitData, bot_token: str) -> dict:
         return init_data.user
 
     return None
+
+
+# TODO write tests

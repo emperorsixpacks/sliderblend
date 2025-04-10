@@ -1,6 +1,8 @@
 NUMBER_OF_SLIDES = 5
 BASE_PROMPT = "base_system_prompt"
 BATCH_SIZE = 96
-
+MAX_FILE_SIZE = 15 * 1024 * 1024  # bytes
+ALLOWED_EXTENSIONS = {".pdf"}
 KB = 1024
 MB = KB * 2
+TG_INITDATA_LIFESPAN = 3600  # seconds
