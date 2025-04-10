@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Self
 
 
 @dataclass
@@ -7,3 +8,4 @@ class Error:
 
 
 type error = Error
+type ModelType = Self | None
