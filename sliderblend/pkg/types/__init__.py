@@ -4,7 +4,7 @@ from sliderblend.pkg.types.redis_types import (
     PROCESS_STATE,
     JobProcess,
     ProcessError,
-    RedisJob,
+    Job,
 )
 from sliderblend.pkg.types.web_types import TelegramInitData, TelegramUser
 
@@ -12,7 +12,7 @@ __all__ = [
     "error",
     "Error",
     "EmbeddingModel",
-    "RedisJob",
+    "Job",
     "PROCESS_STATE",
     "ProcessError",
     "JobProcess",

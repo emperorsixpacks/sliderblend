@@ -13,7 +13,7 @@ class PROCESS_STATE(StrEnum):
 
 
 @dataclass(init=False)
-class RedisJob:
+class Job:
     job_id: UUID = field(default_factory=uuid4)
     process_state: PROCESS_STATE = field(default=PROCESS_STATE.NOT_STARTED)
     file_key: str = field(default=None)

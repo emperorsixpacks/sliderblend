@@ -5,7 +5,7 @@ from uuid import UUID
 from coredis import Redis
 
 from sliderblend.pkg import RedisSettings
-from sliderblend.pkg.types import Error, RedisJob, error
+from sliderblend.pkg.types import Error, Job, error
 
 T = TypeVar("T")
 
@@ -223,7 +223,7 @@ class Jobs(RedisClient):
         super().__new__(self.__class__, settings)
         self.job_prefix = "job:"
 
-    def create_job(self, redis_job: RedisJob) -> Tuple[Optional[RedisJob], error]:
+    def create_job(self, redis_job: Job) -> Tuple[Optional[Job], error]:
         """
         Create a new job in Redis.
 
@@ -231,7 +231,7 @@ class Jobs(RedisClient):
             redis_job: The job object to create
 
         Returns:
-            Tuple[Optional[RedisJob], error]: Tuple containing the created job (or None) and error (if any)
+            Tuple[Optional[Job], error]: Tuple containing the created job (or None) and error (if any)
         """
         job_id = str(redis_job.job_id)
         key = f"{self.job_prefix}{job_id}"
@@ -242,7 +242,7 @@ class Jobs(RedisClient):
 
         return redis_job, None
 
-    def get_job(self, job_id: UUID) -> Tuple[Optional[RedisJob], error]:
+    def get_job(self, job_id: UUID) -> Tuple[Optional[Job], error]:
         """
         Retrieve a job by its ID.
 
@@ -250,12 +250,12 @@ class Jobs(RedisClient):
             job_id: The unique identifier of the job
 
         Returns:
-            Tuple[Optional[RedisJob], error]: Tuple containing the job (or None) and error (if any)
+            Tuple[Optional[Job], error]: Tuple containing the job (or None) and error (if any)
         """
         key = f"{self.job_prefix}{str(job_id)}"
-        return self.retrieve(key, RedisJob)
+        return self.retrieve(key, Job)
 
-    def get_jobs(self, job_ids: List[UUID]) -> List[Optional[RedisJob]]:
+    def get_jobs(self, job_ids: List[UUID]) -> List[Optional[Job]]:
         """
         Retrieve multiple jobs by their IDs.
 
@@ -263,22 +263,22 @@ class Jobs(RedisClient):
             job_ids: List of job IDs to retrieve
 
         Returns:
-            List[Optional[RedisJob]]: List of jobs (None for IDs that don't exist)
+            List[Optional[Job]]: List of jobs (None for IDs that don't exist)
         """
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
-        return self.retrieve_many(keys, RedisJob)
+        return self.retrieve_many(keys, Job)
 
-    def get_all_jobs(self) -> List[RedisJob]:
+    def get_all_jobs(self) -> List[Job]:
         """
         Retrieve all jobs.
 
         Returns:
-            List[RedisJob]: List of all jobs
+            List[Job]: List of all jobs
         """
         pattern = f"{self.job_prefix}*"
-        return self.retrieve_all(pattern, RedisJob)
+        return self.retrieve_all(pattern, Job)
 
-    def update_job(self, job: RedisJob) -> Tuple[bool, error]:
+    def update_job(self, job: Job) -> Tuple[bool, error]:
         """
         Update an existing job.
 
@@ -318,7 +318,7 @@ class Jobs(RedisClient):
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
         return self.delete_many(keys)
 
-    def get_jobs_by_state(self, state: str) -> List[RedisJob]:
+    def get_jobs_by_state(self, state: str) -> List[Job]:
         """
         Get all jobs with a specific state.
 
@@ -326,7 +326,7 @@ class Jobs(RedisClient):
             state: The state value to filter by
 
         Returns:
-            List[RedisJob]: List of jobs with the specified state
+            List[Job]: List of jobs with the specified state
         """
         all_jobs = self.get_all_jobs()
         return [job for job in all_jobs if job.job_state == state]
