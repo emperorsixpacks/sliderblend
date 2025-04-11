@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Tuple
 from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
@@ -18,13 +18,13 @@ class FileSize(Enum):
 
 
 class DatabaseMixin:
-    def create(self, session: Session) -> (ModelType, error):
+    def create(self, session: Session) -> Tuple[ModelType, error]:
         err = self.save(session)
         if err:
             return None, err
         return self, None
 
-    def save(self, session: Session) -> Exception | None:
+    def save(self, session: Session) -> error:
         try:
             session.add(self)
             session.flush()
@@ -32,15 +32,15 @@ class DatabaseMixin:
             return None
         except IntegrityError as e:
             session.rollback()
-            return e
+            return Error(message=str(e.orig).split("\n")[0])
         except SQLAlchemyError as e:
             session.rollback()
-            return e
+            return Error(message=str(e.orig))
 
     @classmethod
     def get(
         cls, *, field: str = "id", value: Any, session: Session
-    ) -> (ModelType, error):
+    ) -> Tuple[ModelType, error]:
         field_attr = getattr(cls, field, None)
 
         if field_attr is None:
@@ -53,8 +53,8 @@ class DatabaseMixin:
 
     @classmethod
     def exists(cls, *, field: str = "id", value: Any, session: Session) -> bool:
-        user, _ = cls.get(field=field, value=value, session=session)
-        return user is not None
+        _, err = cls.get(field=field, value=value, session=session)
+        return err is not None
 
 
 class BaseModel(SQLModel, DatabaseMixin):
@@ -71,16 +71,16 @@ class BaseModel(SQLModel, DatabaseMixin):
 class UserModel(BaseModel, table=True):
     __tablename__ = "users"
 
-    telegram_username: Optional[str] = Field(nullable=True, unique=True)
-    telegram_user_id: Optional[str] = Field(nullable=True, unique=True)
-    first_name: str = Field(nullable=False)
+    telegram_username: str = Field(unique=True)
+    telegram_user_id: str = Field(unique=True)
+    first_name: str
     last_name: Optional[str] = Field(nullable=True)
     language_code: Optional[str] = Field(nullable=True)
 
     is_active: bool = Field(default=True)
 
     last_interaction: Optional[datetime] = Field(nullable=True)
-    chat_id: int = Field(nullable=False)
+    chat_id: int = Field(nullable=True)
 
     email: Optional[EmailStr] = Field(nullable=True)
     phone_number: Optional[str] = Field(nullable=True)
