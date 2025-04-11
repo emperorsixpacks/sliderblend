@@ -1,6 +1,3 @@
-from typing import Self
-
-
 class Error(Exception):
     message: str
     field: str | None
@@ -11,4 +8,3 @@ class Error(Exception):
 
 
 type error = Error | None
-type ModelType = Self | None

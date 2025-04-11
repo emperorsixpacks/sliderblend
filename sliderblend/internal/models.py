@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, List, Optional, Tuple
+from typing import Any, List, Optional, Tuple, Self
 from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
@@ -9,7 +9,7 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import Field, Relationship, Session, SQLModel
 
 from sliderblend.pkg import KB, MB
-from sliderblend.pkg.types import Error, ModelType, error
+from sliderblend.pkg.types import Error, error
 
 
 class FileSize(Enum):
@@ -18,7 +18,7 @@ class FileSize(Enum):
 
 
 class DatabaseMixin:
-    def create(self, session: Session) -> Tuple[ModelType, error]:
+    def create(self, session: Session) -> Tuple[Optional[Self], error]:
         err = self.save(session)
         if err:
             return None, err
@@ -40,7 +40,7 @@ class DatabaseMixin:
     @classmethod
     def get(
         cls, *, field: str = "id", value: Any, session: Session
-    ) -> Tuple[ModelType, error]:
+    ) -> Tuple[Optional[Self], error]:
         field_attr = getattr(cls, field, None)
 
         if field_attr is None:
