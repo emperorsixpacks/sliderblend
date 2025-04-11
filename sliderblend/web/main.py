@@ -1,31 +1,37 @@
 from uuid import UUID
 
-from fastapi import (BackgroundTasks, Depends, FastAPI, Request, UploadFile,
-                     status)
+from fastapi import BackgroundTasks, FastAPI, Request, UploadFile, status
 from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
-from sqlmodel import Session
 
-from sliderblend.internal import (DocumentsModel, IBMStorage, IBMStorageError,
-                                  RedisClient, UserModel)
-from sliderblend.pkg import (IBMSettings, RedisSettings, TelegramSettings,
-                             WebAppSettings, get_logger, get_session)
+from sliderblend.internal import IBMStorage, IBMStorageError, RedisClient
+from sliderblend.pkg import (
+    IBMSettings,
+    RedisSettings,
+    TelegramSettings,
+    WebAppSettings,
+    get_logger,
+)
 from sliderblend.pkg.constants import ALLOWED_EXTENSIONS, MAX_FILE_SIZE
-from sliderblend.pkg.types import RedisJob, TelegramInitData
+from sliderblend.pkg.types import RedisJob
 from sliderblend.pkg.types.redis_types import PROCESS_STATE
-from sliderblend.pkg.utils import verify_tg_init_data
-from sliderblend.web.dependencies import get_current_user
-from sliderblend.web.routes import gen_router
+from sliderblend.pkg.utils import get_templates
+from sliderblend.web.routers import AuthRouter, GenRouter
+
 logger = get_logger()
+telegram_settings = TelegramSettings()
 ibm_settings = IBMSettings()
 redis_sttings = RedisSettings()
 app_settings = WebAppSettings()
-telegram_settings = TelegramSettings()
 ibm_storage_repo = IBMStorage(ibm_settings)
 redis_client = RedisClient(redis_sttings)
+html_templates = get_templates(app_settings)
 
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=app_settings.STATIC_DIR), name="static")
+
+auth_router = AuthRouter(telegram_settings=telegram_settings)
+gen_router = GenRouter(web_app_settings=app_settings, templates=html_templates, total_pages=4)
 
 
 @app.get("/")
@@ -84,32 +90,5 @@ def get_process_status(process_id: UUID):
     pass
 
 
-@app.post("/callback/")
-def callback_url(request: Request, data: dict, session: Session = Depends(get_session)):
-    init_data = TelegramInitData.from_string(data["initData"])
-    data, err = verify_tg_init_data(init_data, telegram_settings.telegram_bot_token)
-    if err:
-        print(err.message)
-        return JSONResponse(content=err.message, status_code=status.HTTP_403_FORBIDDEN)
-    user_data = init_data.user
-    _, err = UserModel.get(
-        field="telegram_user_id", value=str(user_data.telegram_user_id), session=session
-    )
-    if err:
-        new_user = UserModel(**user_data.model_dump())
-        err = new_user.create_user(session)
-        if err:
-            print(err.message)
-            return JSONResponse(
-                content=err.message, status_code=status.HTTP_403_FORBIDDEN
-            )
-
-    return {"ok": True}
-
-
-app.include_router(gen_router)
-"""
-if ((new Date() - new Date(params.auth_date * 1000)) > 86400000) { // milisecond
-    throw new ValidationError('Authorization data is outdated');
-}
-"""
+app.include_router(gen_router.get_router())
+app.include_router(auth_router.get_router())
