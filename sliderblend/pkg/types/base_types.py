@@ -1,11 +1,14 @@
-from dataclasses import dataclass
 from typing import Self
 
 
-@dataclass
-class Error:
+class Error(Exception):
     message: str
+    field: str | None
+
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
 
 
-type error = Error
+type error = Error | None
 type ModelType = Self | None
