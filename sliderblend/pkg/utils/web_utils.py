@@ -2,16 +2,16 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import os
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import time
 from typing import TYPE_CHECKING, Any
-from urllib.parse import parse_qs
 
 from fastapi.templating import Jinja2Templates
 
 from sliderblend.pkg.constants import TG_INITDATA_LIFESPAN
-from sliderblend.pkg.types import error, Error
+from sliderblend.pkg.types import Error, error
 
 if TYPE_CHECKING:
     from starlette.datastructures import URL
@@ -58,7 +58,7 @@ def verify_tg_init_data(
         seconds=TG_INITDATA_LIFESPAN
     )
 
-    if exp_date < datetime.now():
+    if datetime.now() > exp_date:
         return None, Error(message="Data expired")
 
     # Generate secret key from bot token
@@ -69,10 +69,16 @@ def verify_tg_init_data(
     # Verify the hash
     if hmac.compare_digest(computed_hash.hexdigest(), init_data.res_hash):
         # Extract and parse user data
-        return init_data
+        return init_data, None
 
     return None, Error(message="Invalid data")
 
+
+def generate_session_key(key):
+    random_bytes = os.urandom(32)
+    user_data = f"{key}:{time.time()}"
+    key_material = random_bytes + user_data.encode()
+    return hashlib.sha256(key_material).hexdigest()
 
 
 # TODO write tests
