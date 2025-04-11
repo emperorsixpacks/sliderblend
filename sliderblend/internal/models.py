@@ -1,5 +1,5 @@
 from datetime import datetime
-from enum import Enum
+from enum import Enum, unique
 from typing import Any, List, Optional
 from uuid import UUID, uuid4
 
@@ -64,8 +64,8 @@ class BaseModel(SQLModel, DatabaseMixin):
 class UserModel(BaseModel, table=True):
     __tablename__ = "users"
 
-    telegram_username: Optional[str] = Field(nullable=True)
-    telegram_user_id: Optional[str] = Field(nullable=True)
+    telegram_username: Optional[str] = Field(nullable=True, unique=True)
+    telegram_user_id: Optional[str] = Field(nullable=True, unique=True)
     first_name: str = Field(nullable=False)
     last_name: Optional[str] = Field(nullable=True)
     language_code: Optional[str] = Field(nullable=True)
@@ -92,23 +92,13 @@ class UserModel(BaseModel, table=True):
     def update_last_interaction(self):
         self.last_interaction = datetime.now()
 
-    def create(self, session: Session) -> (ModelType, error):
-        # Add the user to the session and commit to the database
-        if self.exists(self.telegram_user_id, session):
-            return None, Error("User exists")
-        with session.begin():
-            session.add(self)
-            session.commit()
-            session.refresh(self)
-
-            return self, None
-
-    @classmethod
-    def get(cls, id_: str, session: Session) -> (ModelType, error):
-        user = session.query(cls).filter(cls.telegram_user_id == str(id_)).first()
-        if user:
-            return user, None
-        return None, Error("User Not found")
+    def create_user(self, session: Session) -> error:
+        if not self.exists(self.telegram_user_id, session):
+            return Error("User exists")
+        _, err = self.create(session)
+        if err:
+            return err
+        return None
 
 
 class DocumentsModel(BaseModel, table=True):
