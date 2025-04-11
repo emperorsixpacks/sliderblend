@@ -10,7 +10,7 @@ from sliderblend.pkg.types import Error, Job, error
 T = TypeVar("T")
 
 
-def _create_client(settings: RedisSettings):
+async def _create_client(settings: RedisSettings):
     """Initialize Redis connection."""
     client = Redis(
         host=settings.redis_host,
@@ -31,7 +31,7 @@ class RedisClient:
             cls._instance = _create_client(settings)  # Connect to Redis
         return cls._client
 
-    def create(self, key: str, data: Any) -> Tuple[bool, error]:
+    async def create(self, key: str, data: Any) -> Tuple[bool, error]:
         """
         Create a new object in Redis.
 
@@ -48,11 +48,11 @@ class RedisClient:
                 if hasattr(data, "model_dump_json")
                 else json.dumps(data)
             )
-            success = self._instance.set(key, serialized_data)
+            success = await self._instance.set(key, serialized_data)
             return success, None
         return None, Error("Data must be a dictionary or have model_dump_json method")
 
-    def batch_create(self, items: Dict[str, Any]) -> List[bool]:
+    async def batch_create(self, items: Dict[str, Any]) -> List[bool]:
         """
         Create multiple objects in a batch operation.
 
@@ -74,7 +74,7 @@ class RedisClient:
 
         return pipe.execute()
 
-    def retrieve(
+    async def retrieve(
         self, key: str, object_class: Type[T] = None
     ) -> Tuple[Optional[T], error]:
         """
@@ -98,7 +98,7 @@ class RedisClient:
             return object_class(**deserialized_data), None
         return deserialized_data, None
 
-    def retrieve_many(
+    async def retrieve_many(
         self, keys: List[str], object_class: Type[T] = None
     ) -> List[Optional[T]]:
         """
@@ -131,7 +131,9 @@ class RedisClient:
 
         return objects
 
-    def retrieve_all(self, pattern: str = "*", object_class: Type[T] = None) -> List[T]:
+    async def retrieve_all(
+        self, pattern: str = "*", object_class: Type[T] = None
+    ) -> List[T]:
         """
         Retrieve all objects matching a pattern.
 
@@ -143,9 +145,9 @@ class RedisClient:
             List[T]: List of retrieved objects
         """
         keys = self._instance.keys(pattern)
-        return self.retrieve_many(keys, object_class) if keys else []
+        return await self.retrieve_many(keys, object_class) if keys else []
 
-    def update(self, key: str, data: Any) -> Tuple[bool, error]:
+    async def update(self, key: str, data: Any) -> Tuple[bool, error]:
         """
         Update an existing object in Redis.
 
@@ -156,9 +158,9 @@ class RedisClient:
         Returns:
             Tuple[bool, error]: Tuple containing success status and error (if any)
         """
-        return self.create(key, data)  # Using create since Redis SET replaces
+        return await self.create(key, data)  # Using create since Redis SET replaces
 
-    def batch_update(self, items: Dict[str, Any]) -> List[bool]:
+    async def batch_update(self, items: Dict[str, Any]) -> List[bool]:
         """
         Update multiple objects in a batch operation.
 
@@ -168,9 +170,9 @@ class RedisClient:
         Returns:
             List[bool]: List of success results for each operation
         """
-        return self.batch_create(items)  # Same as batch create since SET replaces
+        return await self.batch_create(items)  # Same as batch create since SET replaces
 
-    def delete(self, key: str) -> bool:
+    async def delete(self, key: str) -> bool:
         """
         Delete an object from Redis.
 
@@ -183,7 +185,7 @@ class RedisClient:
         deleted_count = self._instance.delete(key)
         return deleted_count > 0
 
-    def delete_many(self, keys: List[str]) -> int:
+    async def delete_many(self, keys: List[str]) -> int:
         """
         Delete multiple objects from Redis.
 
@@ -196,9 +198,9 @@ class RedisClient:
         if not keys:
             return 0
 
-        return self._instance.delete(*keys)
+        return await self._instance.delete(*keys)
 
-    def delete_all(self, pattern: str = "*") -> int:
+    async def delete_all(self, pattern: str = "*") -> int:
         """
         Delete all objects matching a pattern.
 
@@ -212,18 +214,18 @@ class RedisClient:
         if not keys:
             return 0
 
-        return self._instance.delete(*keys)
+        return await self._instance.delete(*keys)
 
 
-class Jobs(RedisClient):
+class RedisJob(RedisClient):
     """Class to manage job objects in Redis, inheriting from RedisClient."""
 
-    def __init__(self, settings: Any):
+    async def __init__(self, settings: Any):
         """Initialize the Jobs client."""
         super().__new__(self.__class__, settings)
         self.job_prefix = "job:"
 
-    def create_job(self, redis_job: Job) -> Tuple[Optional[Job], error]:
+    async def create_job(self, redis_job: Job) -> Tuple[Optional[Job], error]:
         """
         Create a new job in Redis.
 
@@ -235,14 +237,14 @@ class Jobs(RedisClient):
         """
         job_id = str(redis_job.job_id)
         key = f"{self.job_prefix}{job_id}"
-        _, err = self.create(key, redis_job)
+        _, err = await self.create(key, redis_job)
 
         if err:
             return None, err
 
         return redis_job, None
 
-    def get_job(self, job_id: UUID) -> Tuple[Optional[Job], error]:
+    async def get_job(self, job_id: UUID) -> Tuple[Optional[Job], error]:
         """
         Retrieve a job by its ID.
 
@@ -253,9 +255,9 @@ class Jobs(RedisClient):
             Tuple[Optional[Job], error]: Tuple containing the job (or None) and error (if any)
         """
         key = f"{self.job_prefix}{str(job_id)}"
-        return self.retrieve(key, Job)
+        return await self.retrieve(key, Job)
 
-    def get_jobs(self, job_ids: List[UUID]) -> List[Optional[Job]]:
+    async def get_jobs(self, job_ids: List[UUID]) -> List[Optional[Job]]:
         """
         Retrieve multiple jobs by their IDs.
 
@@ -266,9 +268,9 @@ class Jobs(RedisClient):
             List[Optional[Job]]: List of jobs (None for IDs that don't exist)
         """
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
-        return self.retrieve_many(keys, Job)
+        return await self.retrieve_many(keys, Job)
 
-    def get_all_jobs(self) -> List[Job]:
+    async def get_all_jobs(self) -> List[Job]:
         """
         Retrieve all jobs.
 
@@ -276,9 +278,9 @@ class Jobs(RedisClient):
             List[Job]: List of all jobs
         """
         pattern = f"{self.job_prefix}*"
-        return self.retrieve_all(pattern, Job)
+        return await self.retrieve_all(pattern, Job)
 
-    def update_job(self, job: Job) -> Tuple[bool, error]:
+    async def update_job(self, job: Job) -> Tuple[bool, error]:
         """
         Update an existing job.
 
@@ -290,9 +292,9 @@ class Jobs(RedisClient):
         """
         job_id = str(job.job_id)
         key = f"{self.job_prefix}{job_id}"
-        return self.update(key, job)
+        return await self.update(key, job)
 
-    def delete_job(self, job_id: UUID) -> bool:
+    async def delete_job(self, job_id: UUID) -> bool:
         """
         Delete a job by its ID.
 
@@ -303,9 +305,9 @@ class Jobs(RedisClient):
             bool: True if deletion was successful
         """
         key = f"{self.job_prefix}{str(job_id)}"
-        return self.delete(key)
+        return await self.delete(key)
 
-    def delete_jobs(self, job_ids: List[UUID]) -> int:
+    async def delete_jobs(self, job_ids: List[UUID]) -> int:
         """
         Delete multiple jobs by their IDs.
 
@@ -316,9 +318,9 @@ class Jobs(RedisClient):
             int: Number of jobs successfully deleted
         """
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
-        return self.delete_many(keys)
+        return await self.delete_many(keys)
 
-    def get_jobs_by_state(self, state: str) -> List[Job]:
+    async def get_jobs_by_state(self, state: str) -> List[Job]:
         """
         Get all jobs with a specific state.
 
@@ -331,7 +333,7 @@ class Jobs(RedisClient):
         all_jobs = self.get_all_jobs()
         return [job for job in all_jobs if job.job_state == state]
 
-    def count_jobs_by_state(self) -> Dict[Any, int]:
+    async def count_jobs_by_state(self) -> Dict[Any, int]:
         """
         Count jobs by their state.
 
