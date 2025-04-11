@@ -5,4 +5,35 @@
 <link href="/static/styles.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
 <script src="https://unpkg.com/alpinejs@3.13.0/dist/cdn.min.js" defer></script>
-<script src="https://unpkg.com/htmx.org@1.9.6"></script>
+<script src="https://unpkg.com/htmx.org@1.9.6" defer></script>
+<script src="https://telegram.org/js/telegram-web-app.js" defer></script>
+
+<script>
+    // Wait for the Telegram Web App script to load
+    // TODO remove wait for page to load
+    window.addEventListener('load', () => {
+        const webApp = window.Telegram.WebApp;
+
+        // Check if webApp is available
+        if (!webApp || !webApp.initData) {
+            console.error('Telegram WebApp not initialized');
+            return;
+        }
+
+        const initData = webApp.initData;
+        console.log('initData:', initData); // Log initData to browser console
+
+        fetch('https://adapted-kindly-perch.ngrok-free.app/auth/callback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ initData })
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Server response:', data); // Log server response
+        })
+        .catch(error => {
+            console.error('Fetch error:', error); // Log any errors
+        });
+    });
+</script>
