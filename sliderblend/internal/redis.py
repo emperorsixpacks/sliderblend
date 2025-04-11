@@ -10,7 +10,7 @@ from sliderblend.pkg.types import Error, Job, error
 T = TypeVar("T")
 
 
-async def _create_client(settings: RedisSettings):
+def _create_client(settings: RedisSettings):
     """Initialize Redis connection."""
     client = Redis(
         host=settings.redis_host,
