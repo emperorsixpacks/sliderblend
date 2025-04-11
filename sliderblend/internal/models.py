@@ -1,10 +1,10 @@
 from datetime import datetime
-from enum import Enum, unique
+from enum import Enum
 from typing import Any, List, Optional
 from uuid import UUID, uuid4
 
 from pgvector.sqlalchemy import Vector
-from pydantic import ConfigDict, EmailStr
+from pydantic import ConfigDict, EmailStr, field_validator
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import Field, Relationship, Session, SQLModel
 
@@ -38,15 +38,22 @@ class DatabaseMixin:
             return e
 
     @classmethod
-    def get(cls, field: str, session: Session) -> (ModelType, error):
-        user = session.query(cls).filter(cls.id == field).first()
+    def get(
+        cls, *, field: str = "id", value: Any, session: Session
+    ) -> (ModelType, error):
+        field_attr = getattr(cls, field, None)
+
+        if field_attr is None:
+            return None, Error(f"Field '{field}' does not exist in the model.")
+        user = session.query(cls).filter(field_attr == value).first()
+
         if user:
             return user, None
-        return None, Error("User Not found")
+        return None, Error(f"User with {field} = {value} not found")
 
     @classmethod
-    def exists(cls, field: str, session: Session) -> bool:
-        user, _ = cls.get(field, session)
+    def exists(cls, *, field: str = "id", value: Any, session: Session) -> bool:
+        user, _ = cls.get(field=field, value=value, session=session)
         return user is not None
 
 
@@ -85,15 +92,18 @@ class UserModel(BaseModel, table=True):
     is_blocked: bool = Field(default=False)
     documents: List["DocumentsModel"] = Relationship(back_populates="user")
 
-    @property
-    def uniqie_field(self):
-        return "id"
+    @field_validator("telegram_user_id", mode="before")
+    @classmethod
+    def validate_telegram_id(cls, value):
+        return str(value)
 
     def update_last_interaction(self):
         self.last_interaction = datetime.now()
 
     def create_user(self, session: Session) -> error:
-        if not self.exists(self.telegram_user_id, session):
+        if not self.exists(
+            field="telegram_user_id", value=self.telegram_user_id, session=session
+        ):
             return Error("User exists")
         _, err = self.create(session)
         if err:
