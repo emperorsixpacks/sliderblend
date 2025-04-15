@@ -9,6 +9,8 @@ from sliderblend.pkg.types import Error, Job, error
 
 T = TypeVar("T")
 
+TTL = 36000  # seconds
+
 
 def _create_client(settings: RedisSettings):
     """Initialize Redis connection."""
@@ -48,7 +50,7 @@ class RedisClient:
                 if hasattr(data, "model_dump_json")
                 else json.dumps(data)
             )
-            success = await self._instance.set(key, serialized_data)
+            success = await self._instance.set(key, serialized_data, ex=TTL)
             return success, None
         return None, Error("Data must be a dictionary or have model_dump_json method")
 
@@ -70,11 +72,11 @@ class RedisClient:
                 if hasattr(data, "model_dump_json")
                 else json.dumps(data)
             )
-            pipe.set(key, serialized_data)
+            pipe.set(key, serialized_data, ex=TTL)
 
         return pipe.execute()
 
-    async def retrieve(
+    async def get(
         self, key: str, object_class: Type[T] = None
     ) -> Tuple[Optional[T], error]:
         """
@@ -85,7 +87,7 @@ class RedisClient:
             object_class: Optional class to deserialize the data into
 
         Returns:
-            Tuple[Optional[T], error]: Tuple containing the retrieved object (or None) and error (if any)
+            Tuple[Optional[T], error]: Tuple containing the getd object (or None) and error (if any)
         """
         data = self._instance.get(key)
 
@@ -98,18 +100,18 @@ class RedisClient:
             return object_class(**deserialized_data), None
         return deserialized_data, None
 
-    async def retrieve_many(
+    async def get_many(
         self, keys: List[str], object_class: Type[T] = None
     ) -> List[Optional[T]]:
         """
         Retrieve multiple objects from Redis.
 
         Args:
-            keys: List of keys to retrieve
+            keys: List of keys to get
             object_class: Optional class to deserialize the data into
 
         Returns:
-            List[Optional[T]]: List of retrieved objects (None for keys that don't exist)
+            List[Optional[T]]: List of getd objects (None for keys that don't exist)
         """
         pipe = self._instance.pipeline()
 
@@ -131,7 +133,7 @@ class RedisClient:
 
         return objects
 
-    async def retrieve_all(
+    async def get_all(
         self, pattern: str = "*", object_class: Type[T] = None
     ) -> List[T]:
         """
@@ -142,10 +144,10 @@ class RedisClient:
             object_class: Optional class to deserialize the data into
 
         Returns:
-            List[T]: List of retrieved objects
+            List[T]: List of getd objects
         """
         keys = self._instance.keys(pattern)
-        return await self.retrieve_many(keys, object_class) if keys else []
+        return await self.get_many(keys, object_class) if keys else []
 
     async def update(self, key: str, data: Any) -> Tuple[bool, error]:
         """
@@ -255,20 +257,20 @@ class RedisJob(RedisClient):
             Tuple[Optional[Job], error]: Tuple containing the job (or None) and error (if any)
         """
         key = f"{self.job_prefix}{str(job_id)}"
-        return await self.retrieve(key, Job)
+        return await self.get(key, Job)
 
     async def get_jobs(self, job_ids: List[UUID]) -> List[Optional[Job]]:
         """
         Retrieve multiple jobs by their IDs.
 
         Args:
-            job_ids: List of job IDs to retrieve
+            job_ids: List of job IDs to get
 
         Returns:
             List[Optional[Job]]: List of jobs (None for IDs that don't exist)
         """
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
-        return await self.retrieve_many(keys, Job)
+        return await self.get_many(keys, Job)
 
     async def get_all_jobs(self) -> List[Job]:
         """
@@ -278,7 +280,7 @@ class RedisJob(RedisClient):
             List[Job]: List of all jobs
         """
         pattern = f"{self.job_prefix}*"
-        return await self.retrieve_all(pattern, Job)
+        return await self.get_all(pattern, Job)
 
     async def update_job(self, job: Job) -> Tuple[bool, error]:
         """
