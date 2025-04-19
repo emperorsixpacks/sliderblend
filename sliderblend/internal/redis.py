@@ -25,13 +25,9 @@ def _create_client(settings: RedisSettings):
 
 
 class RedisClient:
-    _client = None
 
-    def __new__(cls, settings: Any):
-        if cls._client is None:
-            cls._client = super(RedisClient, cls).__new__(cls)
-            cls._instance = _create_client(settings)  # Connect to Redis
-        return cls._client
+    def __init__(self, settings: RedisSettings):
+        self._client = _create_client(settings)
 
     async def create(self, key: str, data: Any) -> error:
         """
