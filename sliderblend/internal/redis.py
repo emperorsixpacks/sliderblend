@@ -33,7 +33,7 @@ class RedisClient:
             cls._instance = _create_client(settings)  # Connect to Redis
         return cls._client
 
-    async def create(self, key: str, data: Any) -> Tuple[bool, error]:
+    async def create(self, key: str, data: Any) -> error:
         """
         Create a new object in Redis.
 
@@ -51,8 +51,8 @@ class RedisClient:
                 else json.dumps(data)
             )
             success = await self._instance.set(key, serialized_data, ex=TTL)
-            return success, None
-        return None, Error("Data must be a dictionary or have model_dump_json method")
+            return Error("Could not upload to redis") if not success else None
+        return Error("Data must be a dictionary or have model_dump_json method")
 
     async def batch_create(self, items: Dict[str, Any]) -> List[bool]:
         """
@@ -87,7 +87,7 @@ class RedisClient:
             object_class: Optional class to deserialize the data into
 
         Returns:
-            Tuple[Optional[T], error]: Tuple containing the getd object (or None) and error (if any)
+            Tuple[Optional[T], error]: Tuple containing the get object (or None) and error (if any)
         """
         data = self._instance.get(key)
 
@@ -144,12 +144,12 @@ class RedisClient:
             object_class: Optional class to deserialize the data into
 
         Returns:
-            List[T]: List of getd objects
+            List[T]: List of get objects
         """
         keys = self._instance.keys(pattern)
         return await self.get_many(keys, object_class) if keys else []
 
-    async def update(self, key: str, data: Any) -> Tuple[bool, error]:
+    async def update(self, key: str, data: Any) -> error:
         """
         Update an existing object in Redis.
 
@@ -239,7 +239,7 @@ class RedisJob(RedisClient):
         """
         job_id = str(redis_job.job_id)
         key = f"{self.job_prefix}{job_id}"
-        _, err = await self.create(key, redis_job)
+        err = await self.create(key, redis_job)
 
         if err:
             return None, err
@@ -282,7 +282,7 @@ class RedisJob(RedisClient):
         pattern = f"{self.job_prefix}*"
         return await self.get_all(pattern, Job)
 
-    async def update_job(self, job: Job) -> Tuple[bool, error]:
+    async def update_job(self, job: Job) -> error:
         """
         Update an existing job.
 
