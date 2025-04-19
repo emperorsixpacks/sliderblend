@@ -219,12 +219,12 @@ class RedisClient:
         return await self._instance.delete(*keys)
 
 
-class RedisJob(RedisClient):
+class RedisJob():
     """Class to manage job objects in Redis, inheriting from RedisClient."""
 
-    async def __init__(self, settings: Any):
+    async def __init__(self, client: RedisClient):
         """Initialize the Jobs client."""
-        super().__new__(self.__class__, settings)
+        self.redis_client = client
         self.job_prefix = "job:"
 
     async def create_job(self, redis_job: Job) -> Tuple[Optional[Job], error]:
@@ -239,7 +239,7 @@ class RedisJob(RedisClient):
         """
         job_id = str(redis_job.job_id)
         key = f"{self.job_prefix}{job_id}"
-        err = await self.create(key, redis_job)
+        err = await self.redis_client.create(key, redis_job)
 
         if err:
             return None, err
@@ -257,7 +257,7 @@ class RedisJob(RedisClient):
             Tuple[Optional[Job], error]: Tuple containing the job (or None) and error (if any)
         """
         key = f"{self.job_prefix}{str(job_id)}"
-        return await self.get(key, Job)
+        return await self.redis_client.get(key, Job)
 
     async def get_jobs(self, job_ids: List[UUID]) -> List[Optional[Job]]:
         """
@@ -270,7 +270,7 @@ class RedisJob(RedisClient):
             List[Optional[Job]]: List of jobs (None for IDs that don't exist)
         """
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
-        return await self.get_many(keys, Job)
+        return await self.redis_client.get_many(keys, Job)
 
     async def get_all_jobs(self) -> List[Job]:
         """
@@ -280,7 +280,7 @@ class RedisJob(RedisClient):
             List[Job]: List of all jobs
         """
         pattern = f"{self.job_prefix}*"
-        return await self.get_all(pattern, Job)
+        return await self.redis_client.get_all(pattern, Job)
 
     async def update_job(self, job: Job) -> error:
         """
@@ -294,7 +294,7 @@ class RedisJob(RedisClient):
         """
         job_id = str(job.job_id)
         key = f"{self.job_prefix}{job_id}"
-        return await self.update(key, job)
+        return await self.redis_client.update(key, job)
 
     async def delete_job(self, job_id: UUID) -> bool:
         """
@@ -307,7 +307,7 @@ class RedisJob(RedisClient):
             bool: True if deletion was successful
         """
         key = f"{self.job_prefix}{str(job_id)}"
-        return await self.delete(key)
+        return await self.redis_client.delete(key)
 
     async def delete_jobs(self, job_ids: List[UUID]) -> int:
         """
@@ -320,7 +320,7 @@ class RedisJob(RedisClient):
             int: Number of jobs successfully deleted
         """
         keys = [f"{self.job_prefix}{str(job_id)}" for job_id in job_ids]
-        return await self.delete_many(keys)
+        return await self.redis_client.delete_many(keys)
 
     async def get_jobs_by_state(self, state: str) -> List[Job]:
         """
@@ -332,7 +332,7 @@ class RedisJob(RedisClient):
         Returns:
             List[Job]: List of jobs with the specified state
         """
-        all_jobs = self.get_all_jobs()
+        all_jobs = self.redis_client.get_all_jobs()
         return [job for job in all_jobs if job.job_state == state]
 
     async def count_jobs_by_state(self) -> Dict[Any, int]:
@@ -342,7 +342,7 @@ class RedisJob(RedisClient):
         Returns:
             Dict[Any, int]: Dictionary mapping states to counts
         """
-        all_jobs = self.get_all_jobs()
+        all_jobs = self.redis_client.get_all_jobs()
         counts = {}
 
         for job in all_jobs:
