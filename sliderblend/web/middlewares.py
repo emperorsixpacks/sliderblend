@@ -3,17 +3,18 @@ import time
 from typing import Callable
 
 from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from sliderblend.pkg.logger import get_logger
 
 logger = get_logger()
 
 
-class RequestLoggerMiddleware:
+class RequestLoggerMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
-        self.app = app
+        super().__init__(app)
 
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         # Skip logging for certain paths (like health checks)
         if request.url.path in ["/health", "/favicon.ico"]:
             return await call_next(request)
