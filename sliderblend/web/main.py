@@ -2,16 +2,19 @@
 # load files in a named temp fle for processing
 from uuid import UUID
 
-from fastapi import BackgroundTasks, Depends, FastAPI, Request, UploadFile, status
+from fastapi import (BackgroundTasks, Depends, FastAPI, Request, UploadFile,
+                     status)
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from sqlmodel import Session
+from starlette.middleware import Middleware
 
 from sliderblend.internal import init_clients
 from sliderblend.internal.entities import create_document
 from sliderblend.internal.schemas import CreateDocumentSchema, UserCache
 from sliderblend.internal.services import start_process
-from sliderblend.pkg import TelegramSettings, WebAppSettings, get_logger, get_session
+from sliderblend.pkg import (TelegramSettings, WebAppSettings, get_logger,
+                             get_session)
 from sliderblend.pkg.constants import ALLOWED_EXTENSIONS, MAX_FILE_SIZE
 from sliderblend.pkg.types import PROCESS_STATE, Error, Job
 from sliderblend.pkg.utils import PageContext, get_templates
@@ -24,10 +27,10 @@ app_settings = WebAppSettings()
 logger = get_logger()
 clients = init_clients()
 
-MIDDLEWARES = [RequestLoggerMiddleware]
+MIDDLEWARES = [Middleware(RequestLoggerMiddleware)]
 html_templates = get_templates(app_settings)
 
-app = FastAPI(middlewares=MIDDLEWARES)
+app = FastAPI(middleware=MIDDLEWARES)
 app.mount("/static", StaticFiles(directory=app_settings.STATIC_DIR), name="static")
 
 auth_router = AuthRouter(
