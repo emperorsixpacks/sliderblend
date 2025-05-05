@@ -6,7 +6,10 @@ from pydantic import ConfigDict
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlmodel import Field, Session, SQLModel
 
+from sliderblend.pkg import get_logger
 from sliderblend.pkg.types import Error, error
+
+logger = get_logger()
 
 
 class DatabaseMixin:
@@ -24,10 +27,12 @@ class DatabaseMixin:
             return None
         except IntegrityError as e:
             session.rollback()
-            return Error(message=str(e.orig).split("\n")[0])
+            logger.error(e, stack_info=True)
+            return Error()
         except SQLAlchemyError as e:
             session.rollback()
-            return Error(message=str(e.orig))
+            logger.error(e, stack_info=True) 
+            return Error()
 
     @classmethod
     def get(
