@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Optional
+from typing import Optional
 
 from pydantic import EmailStr, Field, field_validator
-from sqlalchemy.orm import Mapped
-from sqlmodel import Relationship, Session
+from sqlmodel import Session
 
 from sliderblend.internal.models.base import BaseModel
 from sliderblend.pkg.types import Error, error
@@ -23,7 +22,7 @@ class UserModel(BaseModel, table=True):
     is_active: bool = Field(default=True)
 
     last_interaction: Optional[datetime] = Field(nullable=True)
-    chat_id: int = Field(nullable=True)  # Supposed to be in message
+    chat_instance: str = Field(nullable=True)  # Supposed to be in message
 
     email: Optional[EmailStr] = Field(nullable=True)
     phone_number: Optional[str] = Field(nullable=True)
