@@ -1,8 +1,9 @@
 import logging
 
 
-def get_logger(name: str = "app_logger") -> logging.Logger:
-    logger = logging.getLogger(name)
+def get_logger() -> logging.Logger:
+
+    logger = logging.getLogger(__name__)
 
     if (
         not logger.handlers
