@@ -1,5 +1,4 @@
-# TODO we need to fix this so that we do not load agent settigns here
-# load files in a named temp fle for processing
+from contextlib import asynccontextmanager
 from uuid import UUID
 
 from fastapi import (BackgroundTasks, Depends, FastAPI, Request, UploadFile,
@@ -18,36 +17,50 @@ from sliderblend.pkg import (TelegramSettings, WebAppSettings, get_logger,
 from sliderblend.pkg.constants import ALLOWED_EXTENSIONS, MAX_FILE_SIZE
 from sliderblend.pkg.types import PROCESS_STATE, Error, Job
 from sliderblend.pkg.utils import PageContext, get_templates
+from sliderblend.web import dependencies
 from sliderblend.web.dependencies import get_current_user
 from sliderblend.web.middlewares import RequestLoggerMiddleware
 from sliderblend.web.routers import AuthRouter, GenRouter
 
 telegram_settings = TelegramSettings()
 app_settings = WebAppSettings()
-logger = get_logger()
-clients = init_clients()
+
+logger = get_logger(__name__)
 
 MIDDLEWARES = [Middleware(RequestLoggerMiddleware)]
 html_templates = get_templates(app_settings)
 
-app = FastAPI(middleware=MIDDLEWARES)
-app.mount("/static", StaticFiles(directory=app_settings.STATIC_DIR), name="static")
 
 auth_router = AuthRouter(
     telegram_settings=telegram_settings,
-    redis_client=clients.REDIS_CLIENT,
 )
 gen_router = GenRouter(
     web_app_settings=app_settings, templates=html_templates, total_pages=4
 )
 
 
-def get_user_session():
-    return get_current_user(redis_client=clients.REDIS_CLIENT)
+@asynccontextmanager
+async def lifespan(a: FastAPI):
+    # Initialize all clients at startup
+    clients = await init_clients()
+    a.state.clients = clients
+    logger.info("Service initialization complete")
+
+    yield  # App runs here
+
+    # Cleanup resources at shutdown
+    # await clients.REDIS_CLIENT.close()
+    # await clients.COHERE_CLIENT.close()
+    # logger.info("Services shut down gracefully")
+
+
+app = FastAPI(lifespan=lifespan)
+
+app.mount("/static", StaticFiles(directory=app_settings.STATIC_DIR), name="static")
 
 
 @app.get("/")
-async def home(request: Request) -> HTMLResponse:
+async def home(request: Request, user=Depends(get_current_user)) -> HTMLResponse:
     context = PageContext(
         next_step=request.url_for("upload_document"),
         request=request,
@@ -60,7 +73,7 @@ async def home(request: Request) -> HTMLResponse:
 async def create_process(
     document: UploadFile,
     background_tasks: BackgroundTasks,
-    user: UserCache = Depends(get_user_session),
+    user: UserCache = Depends(get_current_user),
     session: Session = Depends(get_session),
 ):
     """Creates a new process, runs it in the background, and returns the
