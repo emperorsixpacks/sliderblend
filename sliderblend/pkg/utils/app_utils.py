@@ -1,6 +1,7 @@
 import os
+from enum import StrEnum
 
-from fitz import r
+from sliderblend.pkg.types import FileSize
 
 
 def return_base_dir():
@@ -20,6 +21,41 @@ def exists(path: str) -> bool:
     return os.path.exists(path)
 
 
+def get_file_size(data: bytes) -> float:
+    """
+    Returns the size of a bytes object in the specified unit.
+
+    Args:
+        data (bytes): The bytes object to measure.
+
+    Returns:
+        float: The size of the data in the specified unit.
+    """
+    size_in_bytes = len(data)
+
+    return size_in_bytes
+
+
+def format_file_size(size_in_bytes: int) -> FileSize:
+    """
+    Returns a human-readable file size from a size in bytes.
+
+    Args:
+        size_in_bytes (int): The file size in bytes.
+
+    Returns:
+        str: The file size formatted with the appropriate unit.
+    """
+    if size_in_bytes < 1024:
+        return FileSize.KiloBytes
+    if size_in_bytes < 1024**2:
+        return FileSize.MegaBytes
+
+
+def file_size_mb(size: int):
+    return size / (1024**2)
+
+
 class Prompt:
     def __init__(self, prompt_name: str, /, **kwargs: str) -> None:
         self.prompt_name = prompt_name
@@ -37,3 +73,15 @@ class Prompt:
             file.close()
 
         return prompt.format_map(self.prompt_params)
+
+    from enum import Enum
+
+
+class ValidFileType(StrEnum):
+    PDF = "application/pdf"
+    DOCX = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    TXT = "text/plain"
+
+    @classmethod
+    def is_valid(cls, mime_type: str) -> bool:
+        return mime_type in cls._value2member_map_

@@ -11,13 +11,12 @@ from typing import TYPE_CHECKING, Any
 from fastapi.templating import Jinja2Templates
 
 from sliderblend.pkg.constants import TG_INITDATA_LIFESPAN
-from sliderblend.pkg.types import Error, error
+from sliderblend.pkg.types import Error, TelegramInitData, error
 
 if TYPE_CHECKING:
     from starlette.datastructures import URL
 
     from sliderblend.pkg.settings import WebAppSettings
-    from sliderblend.pkg.types import TelegramInitData
 
 
 def get_templates(settings: WebAppSettings) -> Jinja2Templates:
@@ -42,7 +41,7 @@ class PageContext:
 
 def verify_tg_init_data(
     init_data: TelegramInitData, bot_token: str
-) -> TelegramInitData | error:
+) -> tuple[TelegramInitData, error]:
     """
     Verify Telegram initData and return user data if valid.
 
@@ -53,7 +52,7 @@ def verify_tg_init_data(
     Returns:
         dict: User data if verified, or raises ValueError if invalid
     """
-
+    init_data = TelegramInitData.from_string(init_data)
     exp_date = datetime.fromtimestamp(init_data.auth_date) + timedelta(
         seconds=TG_INITDATA_LIFESPAN
     )
