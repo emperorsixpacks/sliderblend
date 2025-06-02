@@ -1,21 +1,15 @@
-from sliderblend.pkg.types.agent_types import EmbeddingModel
-from sliderblend.pkg.types.base_types import Error, error 
-from sliderblend.pkg.types.redis_types import (
-    PROCESS_STATE,
-    JobProcess,
-    ProcessError,
-    Job,
-)
-from sliderblend.pkg.types.web_types import TelegramInitData, TelegramUser
+from sliderblend.pkg.types.base_types import (Error, FileSize, StorageProvider,
+                                              error)
+from sliderblend.pkg.types.redis_types import PROCESS_STATE, Job
+from sliderblend.pkg.types.telegram_types import TelegramInitData, TelegramUser
 
 __all__ = [
+    "FileSize",
     "error",
     "Error",
-    "EmbeddingModel",
     "Job",
     "PROCESS_STATE",
-    "ProcessError",
-    "JobProcess",
     "TelegramUser",
     "TelegramInitData",
+    "StorageProvider",
 ]

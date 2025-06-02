@@ -1,6 +1,1 @@
-from functools import partial
 
-
-class EmbeddingModel(partial):
-    def embedd(*args, **kwargs): ...
-    async def embedd(*args, **kwargs): ...

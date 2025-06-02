@@ -18,12 +18,12 @@ class Base(BaseModel):
         parsed_data["user"] = json.loads(parsed_data["user"])
 
         # Create and return the TelegramInitData object
-        return cls.from_orm(parsed_data)
+        return cls.model_validate(parsed_data)
 
     def to_string(self) -> str:
         """Convert the model fields into a string of key-value pairs."""
         lines = []
-        for key, value in self.model_dump(by_alias=True).items():
+        for key, value in self.model_dump(by_alias=True, exclude_none=True).items():
             # Format as "key": "value" (strings get quoted, others don’t)
             lines.append(f"{key}={value}")
         return (
@@ -37,10 +37,10 @@ class Base(BaseModel):
 
 
 class TelegramUser(Base):
-    user_id: int = Field(alias="id")
+    telegram_user_id: int = Field(alias="id")
     first_name: str
     last_name: str | None = None
-    username: str | None = None
+    telegram_username: str | None = Field(alias="username", default=None)
     language_code: str | None = None
     allows_write_to_pm: str
     photo_url: str
@@ -58,3 +58,5 @@ class TelegramInitData(Base):
     auth_date: int
     signature: str
     res_hash: str = Field(alias="hash", exclude=True)
+
+

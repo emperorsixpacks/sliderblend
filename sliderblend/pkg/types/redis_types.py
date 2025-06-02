@@ -12,7 +12,7 @@ class PROCESS_STATE(StrEnum):
     COMPLETED = "completed"
 
 
-@dataclass(init=False)
+@dataclass()
 class Job:
     job_id: UUID = field(default_factory=uuid4)
     process_state: PROCESS_STATE = field(default=PROCESS_STATE.NOT_STARTED)
@@ -34,5 +34,3 @@ class Job:
         self.is_complete = True
 
 
-type ProcessError = dict | None
-type JobProcess = RedisJob | None
