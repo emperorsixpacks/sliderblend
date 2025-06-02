@@ -1,11 +1,19 @@
-import os
-from pathlib import Path
-from typing import Optional
+from __future__ import annotations
 
-from pydantic import AnyUrl
+import os
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING, Optional, Union
+
+from cohere.client_v2 import AsyncClientV2, ClientV2
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from sliderblend.pkg.utils import return_base_dir
+
+if TYPE_CHECKING:
+    from sliderblend.internal import IBMStorage
+    from sliderblend.internal.redis import RedisClient, RedisJob
+
 
 env_dir = os.path.join(return_base_dir(), ".env")
 
@@ -20,7 +28,6 @@ class WebAppSettings(AppSettings):
     PROJECT_NAME: str = "Slide Generator API"
     BASE_DIR: Path = return_base_dir()
     TEMPLATES_DIR: Path = os.path.join(BASE_DIR, "pages")
-    STATIC_DIR: Path = os.path.join(BASE_DIR, "public")
 
 
 class DatabaseSettings(AppSettings):
@@ -44,10 +51,31 @@ class CohereSettings(AppSettings):
 
 
 class RedisSettings(AppSettings):
-    redis_url: AnyUrl
+    redis_port: int
+    redis_host: str
+    redis_username: str = ""
+    redis_password: str
+
 
 class IBMSettings(AppSettings):
-    ibm_service_enpoint: AnyUrl
+    ibm_service_endpoint: str
     ibm_bucket_name: str
     ibm_bucket_instance_id: str
     ibm_api_key: str
+
+
+class FilebaseSettings(AppSettings):
+    filebase_access_key: str
+    filebase_secret_access_key: str
+
+
+class TelegramSettings(AppSettings):
+    telegram_bot_token: str
+
+
+@dataclass
+class ClientSettings:
+    REDIS_CLIENT: Optional[RedisClient] = None
+    REDIS_JOB: Optional[RedisJob] = None
+    COHERE_CLIENT: Optional[Union[AsyncClientV2, ClientV2]] = None
+    IBM_CLIENT: Optional[IBMStorage] = None
