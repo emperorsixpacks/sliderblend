@@ -1,4 +1,5 @@
 import os
+import re
 from enum import StrEnum
 
 from sliderblend.pkg.types import FileSize
@@ -54,6 +55,13 @@ def format_file_size(size_in_bytes: int) -> FileSize:
 
 def file_size_mb(size: int):
     return size / (1024**2)
+
+
+def sanitize_filename(filename: str) -> str:
+    basename = filename.split("/")[-1].split("\\")[-1]
+    no_spaces = basename.replace(" ", "_")
+    cleaned = re.sub(r"[^a-zA-Z0-9._-]", "", no_spaces)
+    return cleaned.lower()
 
 
 class Prompt:
