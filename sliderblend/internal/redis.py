@@ -25,7 +25,6 @@ def _create_client(settings: RedisSettings):
 
 
 class RedisClient:
-
     def __init__(self, settings: RedisSettings):
         self._instance = _create_client(settings)
 
@@ -40,16 +39,22 @@ class RedisClient:
         Returns:
             Tuple[bool, error]: Tuple containing success status and error (if any)
         """
-        if isinstance(data, dict) or hasattr(data, "model_dump_json") or hasattr(data, "dict"):
+        if (
+            isinstance(data, dict)
+            or hasattr(data, "model_dump_json")
+            or hasattr(data, "dict")
+        ):
             if hasattr(data, "model_dump_json"):
-                 serialized_data = str(data.model_dump_json())
+                serialized_data = str(data.model_dump_json())
             elif hasattr(data, "dict"):
                 serialized_data = str(data.dict())
             else:
-                serialized_data=str(json.dumps(data))
+                serialized_data = str(json.dumps(data))
             success = await self._instance.set(key, serialized_data, ex=TTL)
             return Error("Could not upload to redis") if not success else None
-        return Error("Data must be a dictionary or have amodel_dump_json or dict method")
+        return Error(
+            "Data must be a dictionary or have amodel_dump_json or dict method"
+        )
 
     async def batch_create(self, items: Dict[str, Any]) -> List[bool]:
         """
@@ -86,7 +91,7 @@ class RedisClient:
         Returns:
             Tuple[Optional[T], error]: Tuple containing the get object (or None) and error (if any)
         """
-        data = self._instance.get(key)
+        data = await self._instance.get(key)
 
         if data is None:
             return None, Error("Not found")
@@ -219,9 +224,9 @@ class RedisClient:
 class RedisJob:
     """Class to manage job objects in Redis, inheriting from RedisClient."""
 
-    def __init__(self, client: RedisClient):
+    def __init__(self, settings: RedisSettings):
         """Initialize the Jobs client."""
-        self.redis_client = client
+        self.redis_client = RedisClient(settings)
         self.job_prefix = "job:"
 
     async def create_job(self, redis_job: Job) -> Tuple[Optional[Job], error]:
