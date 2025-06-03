@@ -65,12 +65,17 @@ class IBMSettings(AppSettings):
 
 
 class FilebaseSettings(AppSettings):
+    filebase_bucket_name: str
     filebase_access_key: str
     filebase_secret_access_key: str
 
 
 class TelegramSettings(AppSettings):
     telegram_bot_token: str
+
+
+class AppSecret(AppSettings):
+    app_secret: str
 
 
 @dataclass
