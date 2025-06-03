@@ -1,35 +1,44 @@
-from typing import List
+from __future__ import annotations
 
-import cohere
+import io
+from typing import IO, List, Union
+
 import fitz
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from cohere import AsyncClient, Client
 
-from sliderblend.pgk import get_logger, CohereSettings 
-from sliderblend.pkg.types import EmbeddingModel
+from sliderblend.pkg import CohereSettings, get_logger
 from sliderblend.pkg.utils import exists
 
 cohere_settings = CohereSettings()
-logger = get_logger()
+logger = get_logger(__name__)
 
-RECURSIVESPLITTER = RecursiveCharacterTextSplitter(
-    ["\n\n", "\n", "."], chunk_size=1500, chunk_overlap=500
-)
-
-EMBEDDING_MODEL = cohere.AsyncClient(cohere_settings.cohere_api_key)
+type EMBEDDING_MODEL = Union[Client, AsyncClient]
 
 
 # TODO we need to fix this to load multiple documents
+# TODO we need to load, return the file contents as well as the number of pages, the file size and unit
+
+
 class LoadPDF:
-    def __init__(self, file_name: str) -> None:
-        self.file = file_name
+    def __init__(self, source: Union[str, IO[bytes]]) -> None:
+        self.source = source
 
     def read(self):
         contents: str = ""
-        if not exists(self.file):
-            logger.error("could not open file %s", self.file)
-            raise FileNotFoundError(f"Prompt {self.file} does not exist")
-        with fitz.open(self.file) as document:
-            for page in document:
+
+        if isinstance(self.source, str):
+            if not exists(self.source):
+                logger.error("could not open file %s", self.source)
+                raise FileNotFoundError(f"Prompt {self.source} does not exist")
+            doc = fitz.open(self.source)
+        elif isinstance(self.source, io.IOBase):
+            # Assumes binary mode (rb) if it's a file-like object
+            doc = fitz.open(stream=self.source.read(), filetype="pdf")
+        else:
+            raise TypeError("Source must be a file path or a file-like object")
+
+        with doc:
+            for page in doc:
                 contents += page.get_text()
         return contents
 
@@ -37,7 +46,7 @@ class LoadPDF:
 # This function exclusively uses Cohere's embedding model to embed documents.
 # It processes the input document in batches and returns float embeddings.
 async def embed_document(
-    embedding_model: EmbeddingModel, *, document: List[str], batch_size: int
+    embedding_model: EMBEDDING_MODEL, *, document: List[str], batch_size: int
 ):
     all_embeddings = []
 
