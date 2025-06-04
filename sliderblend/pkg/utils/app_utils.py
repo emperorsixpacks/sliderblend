@@ -1,8 +1,14 @@
+import hashlib
+import hmac
+import json
 import os
 import re
 from enum import StrEnum
 
-from sliderblend.pkg.types import FileSize
+from jinja2 import pass_context
+from pydantic_core.core_schema import dict_schema
+
+from sliderblend.pkg.types import FileUnit
 
 
 def return_base_dir():
@@ -37,7 +43,7 @@ def get_file_size(data: bytes) -> float:
     return size_in_bytes
 
 
-def format_file_size(size_in_bytes: int) -> FileSize:
+def format_file_size(size_in_bytes: int) -> FileUnit:
     """
     Returns a human-readable file size from a size in bytes.
 
@@ -48,13 +54,13 @@ def format_file_size(size_in_bytes: int) -> FileSize:
         str: The file size formatted with the appropriate unit.
     """
     if size_in_bytes < 1024:
-        return FileSize.KiloBytes
+        return FileUnit.KiloBytes
     if size_in_bytes < 1024**2:
-        return FileSize.MegaBytes
+        return FileUnit.MegaBytes
 
 
-def file_size_mb(size: int):
-    return size / (1024**2)
+def file_size_kb(size: int):
+    return size // (1024)
 
 
 def sanitize_filename(filename: str) -> str:
@@ -62,6 +68,17 @@ def sanitize_filename(filename: str) -> str:
     no_spaces = basename.replace(" ", "_")
     cleaned = re.sub(r"[^a-zA-Z0-9._-]", "", no_spaces)
     return cleaned.lower()
+
+
+def create_signature(secret_key: str, payload: dict) -> str:
+    paylod_str = json.dumps(payload)
+    computed_hash = hmac.new(secret_key.encode(), paylod_str.encode(), hashlib.sha256)
+    return computed_hash.hexdigest()
+
+
+def verifiy_payload(secret_key: str, signature: str, payload: dict) -> bool:
+    computed_hash = create_signature(secret_key, payload)
+    return hmac.compare_digest(signature, computed_hash)
 
 
 class Prompt:
