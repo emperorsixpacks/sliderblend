@@ -9,7 +9,7 @@ from sqlmodel import Field, Session, SQLModel
 from sliderblend.pkg import get_logger
 from sliderblend.pkg.types import Error, error
 
-logger = get_logger()
+logger = get_logger(__name__)
 
 
 class DatabaseMixin:

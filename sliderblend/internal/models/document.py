@@ -8,7 +8,7 @@ from sqlmodel import Field, Relationship
 
 from sliderblend.internal.models.base import BaseModel
 from sliderblend.pkg import KB, MB
-from sliderblend.pkg.types import FileSize
+from sliderblend.pkg.types import FileUnit
 
 
 class DocumentsModel(BaseModel, table=True):
@@ -16,16 +16,8 @@ class DocumentsModel(BaseModel, table=True):
     number_of_pages: int = Field(nullable=False)
     document_name: str = Field(nullable=False)
     size: int = Field(nullable=False)
-    unit: FileSize = Field(nullable=False)
     is_embedded: bool = Field(default=False, nullable=False)
     user_id: UUID = Field(foreign_key="users.id", ondelete="CASCADE", nullable=False)
-
-    def get_size_in_unit(self) -> str:
-        if self.unit == FileSize.KiloBytes:
-            return f"{self.size * KB}kb"
-        if self.unit == FileSize.MegaBytes:
-            return f"{self.size * MB}mb"
-        return None
 
 
 class DocumentEmbeddingsModel(BaseModel, table=True):

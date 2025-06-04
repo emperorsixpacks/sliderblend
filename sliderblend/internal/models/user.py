@@ -13,7 +13,7 @@ from sliderblend.pkg.types import Error, error
 class UserModel(BaseModel, table=True):
     __tablename__ = "users"
 
-    telegram_username: str = Field(unique=True)
+    telegram_username: str| None = Field(unique=True, default=None)
     telegram_user_id: str = Field(unique=True)
     first_name: str
     last_name: Optional[str] = Field(nullable=True)
