@@ -4,9 +4,12 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 from sqlmodel import SQLModel
 
-
 # My custom imports
-from sliderblend.internal import DocumentEmbeddingsModel, DocumentsModel, UserModel
+from sliderblend.internal.models import (
+    DocumentEmbeddingsModel,
+    DocumentsModel,
+    UserModel,
+)
 from sliderblend.pkg import DatabaseSettings
 
 # this is the Alembic Config object, which provides
