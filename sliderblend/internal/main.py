@@ -1,50 +1,32 @@
 from cohere import AsyncClientV2
 
-from sliderblend.internal.redis import RedisJob, RedisClient
-from sliderblend.internal.ibm_storage import IBMStorage
-from sliderblend.pkg import (
-    AgentSettings,
-    CohereSettings,
-    IBMSettings,
-    RedisSettings,
-    get_logger,
-)
+from sliderblend.internal.storage import get_storage_provider 
+from sliderblend.internal.redis import RedisClient, RedisJob
+from sliderblend.pkg import (ClientSettings, CohereSettings, FilebaseSettings,
+                             RedisSettings, get_logger)
 
-logger = get_logger("init-clients")
+logger = get_logger(__name__)
 
 
-def init_clients() -> AgentSettings:
-    logger.info("Setting up client settigns")
+async def init_clients() -> ClientSettings:
+    logger.info("Setting up client settings")
 
-    ibm_settings = IBMSettings()
-    logger.debug(f"IBMSettings loaded: {ibm_settings}")
-
+    # Load settings
+    storage_settings = FilebaseSettings()
     redis_settings = RedisSettings()
-    logger.debug(f"RedisSettings loaded: {redis_settings}")
-
     cohere_settings = CohereSettings()
-    logger.debug(f"CohereSettings loaded: {cohere_settings}")
 
-    ibm_storage_repo = IBMStorage(ibm_settings)
-    logger.info("IBM Storage client initialized.")
-
+    # Initialize clients
+    ibm_storage_repo = get_storage_provider("filebase", storage_settings)
     redis_client = RedisClient(redis_settings)
-    logger.info("Redis client initialized.")
-
-    redis_job = RedisJob(redis_client)
-    logger.info("Redis job client initialized.")
-
+    redis_job = RedisJob(redis_settings)
     cohere_client = AsyncClientV2(cohere_settings.cohere_api_key)
-    logger.info("Cohere client initialized.")
 
-    logger.info("Database session created.")
+    logger.info("All clients initialized")
 
-    agent_settings = AgentSettings(
-        REDIS_JOB_CLIENT=redis_job,
+    return ClientSettings(
+        REDIS_JOB=redis_job,
         REDIS_CLIENT=redis_client,
         COHERE_CLIENT=cohere_client,
         IBM_CLIENT=ibm_storage_repo,
     )
-
-    logger.info("Agent settings assembled and returned.")
-    return agent_settings

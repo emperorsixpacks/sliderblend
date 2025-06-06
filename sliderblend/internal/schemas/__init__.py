@@ -2,6 +2,7 @@ from sliderblend.internal.schemas.bot import BotChunkRequestSchema, BotRequestSc
 from sliderblend.internal.schemas.document import (
     CreateDocumentSchema,
     GetDocumentSchema,
+    CreateDocumentEmbeddingSchema,
 )
 from sliderblend.internal.schemas.user import SessionData, UserCache
 
@@ -10,6 +11,7 @@ __all__ = [
     "SessionData",
     "CreateDocumentSchema",
     "GetDocumentSchema",
+    "CreateDocumentEmbeddingSchema",
     "BotChunkRequestSchema",
     "BotRequestSchema",
 ]

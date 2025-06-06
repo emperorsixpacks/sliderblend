@@ -8,3 +8,5 @@ class BotRequestSchema(BaseModel):
 
 class BotChunkRequestSchema(BotRequestSchema):
     file_id: str
+    size: int
+    number_of_pages: int

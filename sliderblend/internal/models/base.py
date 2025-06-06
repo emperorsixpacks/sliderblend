@@ -28,11 +28,11 @@ class DatabaseMixin:
         except IntegrityError as e:
             session.rollback()
             logger.error(e, stack_info=True)
-            return Error()
+            return Error(e)
         except SQLAlchemyError as e:
             session.rollback()
             logger.error(e, stack_info=True) 
-            return Error()
+            return Error(e)
 
     @classmethod
     def get(

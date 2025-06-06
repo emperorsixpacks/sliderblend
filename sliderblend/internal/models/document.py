@@ -1,14 +1,12 @@
 from __future__ import annotations
 
-from typing import Any, List, Optional
+from typing import Any
 from uuid import UUID
 
 from pgvector.sqlalchemy import Vector
-from sqlmodel import Field, Relationship
+from sqlmodel import Field
 
 from sliderblend.internal.models.base import BaseModel
-from sliderblend.pkg import KB, MB
-from sliderblend.pkg.types import FileUnit
 
 
 class DocumentsModel(BaseModel, table=True):

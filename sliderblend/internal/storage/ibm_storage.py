@@ -100,7 +100,7 @@ class IBMStorage:
     ) -> Tuple[Optional[str], Error]:
         return self.upload_to_bucket(data, object_name, folder_path)
 
-    def download_objects(
+    def downloa_bytes(
         self,
         object_name: str,
         destination: Union[str, BinaryIO] = None,

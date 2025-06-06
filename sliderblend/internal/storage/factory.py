@@ -2,16 +2,21 @@ from typing import Union
 
 from sliderblend.internal.storage.filebase_storage import FilebaseStorage
 from sliderblend.internal.storage.ibm_storage import IBMStorage
-from sliderblend.pkg import FilebaseSettings, IBMSettings
-from sliderblend.pkg.types import StorageProvider
+from sliderblend.pkg import FilebaseSettings, IBMSettings, get_logger
+from sliderblend.pkg.types import Error, StorageProvider, error
+
+logger = get_logger(__name__)
 
 
 def get_storage_provider(
     provider: str, settings: Union[IBMSettings, FilebaseSettings]
-) -> StorageProvider:
+) -> tuple[StorageProvider, error]:
     provider = provider.lower()
+    logger.info("Creating storage bucket for %s", provider)
     if provider == "ibm":
-        return IBMStorage(settings)
+        logger.info("Creating IBM storage")
+        return IBMStorage(settings), None
     if provider == "filebase":
-        return FilebaseStorage(settings)
-    raise ValueError(f"Unsupported storage provider: {provider}")
+        logger.info("Creating Filebase storage")
+        return FilebaseStorage(settings), None
+    return None, Error(f"Unsupported storage provider: {provider}")

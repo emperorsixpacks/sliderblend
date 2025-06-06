@@ -48,7 +48,6 @@ class FilebaseStorage:
         folder_path: Optional[str] = None,
     ) -> Tuple[Optional[str], Error]:
         bucket_name = self.credentials.filebase_bucket_name
-        print(self._client.list_objects(Bucket=bucket_name))
         if folder_path:
             folder_path = folder_path.strip("/")
             if folder_path and not folder_path.endswith("/"):
@@ -57,24 +56,45 @@ class FilebaseStorage:
         else:
             full_object_name = object_name
 
-        logger.info(f"Uploading to IBM bucket: {bucket_name}/{full_object_name}")
+        logger.info(f"Uploading to filebase bucket: {bucket_name}/{full_object_name}")
 
         try:
             if isinstance(file_data, str):
                 self._client.Object(bucket_name, full_object_name).upload_file(
                     file_data
                 )
-            else:
+            elif isinstance(file_data, BytesIO):
+                self._client.upload_fileobj(file_data, bucket_name, full_object_name)
+            elif isinstance(file_data, (bytes, bytearray)):
                 file_obj = BytesIO(file_data)
+
                 self._client.upload_fileobj(file_obj, bucket_name, full_object_name)
 
             logger.info(f"Upload successful: {full_object_name}")
             return full_object_name, None
         except Exception as e:
             logger.error(f"Upload failed: {e}")
-            return None, Error(f"Error uploading file to IBM COS: {e}")
+            return None, Error(f"Error uploading file to filebase: {e}")
 
     def upload_bytes(
         self, data: bytes, object_name: str, folder_path: Optional[str] = None
     ) -> Tuple[Optional[str], Error]:
         return self.upload_to_bucket(data, object_name, folder_path)
+
+    def download_bytes(
+        self,
+        object_name: str,
+        destination: Union[str, BinaryIO] = None,
+    ) -> Tuple[Optional[str], Error]:
+        logger.info(f"Downloading object: {object_name}")
+        try:
+            self._client.download_fileobj(
+                Bucket=self.credentials.filebase_bucket_name,
+                Key=object_name,
+                Fileobj=destination,
+            )
+            logger.info(f"Downloaded object: {object_name}")
+            return f"<in-memory:{object_name}>", None
+        except Exception as e:
+            logger.error(f"Download failed: {e}")
+            return None, Error(f"Error downloading object: {str(e)}")
