@@ -8,7 +8,7 @@ class Error(Exception):
         super().__init__(message)
 
 
-class FileSize(Enum):
+class FileUnit(Enum):
     KiloBytes = 0
     MegaBytes = 1
 
@@ -38,11 +38,11 @@ class StorageProvider(Protocol):
         folder_path: Optional[str] = None,
     ) -> Tuple[Optional[str], Error]: ...
 
-    def download_objects(
+    def download_bytes(
         self,
         object_name: str,
         destination: Union[str, BinaryIO],
-    ) -> Tuple[Optional[str], Error]: ...
+    ) -> Tuple[Optional[bytes], Error]: ...
 
     def generate_presigned_url(
         self,

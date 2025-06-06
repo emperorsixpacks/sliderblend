@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import StrEnum
+from typing import Dict
 from uuid import UUID, uuid4
 
 
@@ -12,13 +13,13 @@ class PROCESS_STATE(StrEnum):
     COMPLETED = "completed"
 
 
-@dataclass()
+@dataclass
 class Job:
-    job_id: UUID = field(default_factory=uuid4)
-    process_state: PROCESS_STATE = field(default=PROCESS_STATE.NOT_STARTED)
-    file_key: str = field(default=None)
-    is_complete: bool = field(default=False)
-    _date_published: datetime = field(default_factory=datetime.now)
+    job_id: UUID = field(default_factory=uuid4, init=False)
+    process_state: PROCESS_STATE = field(default=PROCESS_STATE.NOT_STARTED, init=False)
+    metadata: Dict[str, any] = field(default=None)
+    is_complete: bool = field(default=False, init=False)
+    _date_published: datetime = field(default_factory=datetime.now, init=False)
 
     @property
     def date_published(self) -> str:
@@ -27,10 +28,5 @@ class Job:
     def dict(self) -> None:
         return self.__dict__
 
-    def set_file_key(self, key: str) -> None:
-        self.file_key = key
-
     def completed(self) -> None:
         self.is_complete = True
-
-

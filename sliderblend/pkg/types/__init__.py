@@ -1,10 +1,10 @@
-from sliderblend.pkg.types.base_types import (Error, FileSize, StorageProvider,
+from sliderblend.pkg.types.base_types import (Error, FileUnit, StorageProvider,
                                               error)
 from sliderblend.pkg.types.redis_types import PROCESS_STATE, Job
 from sliderblend.pkg.types.telegram_types import TelegramInitData, TelegramUser
 
 __all__ = [
-    "FileSize",
+    "FileUnit",
     "error",
     "Error",
     "Job",
